@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "423180074821",
+    "project_id": "splitapp-c7fd9",
+    "storage_bucket": "splitapp-c7fd9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423180074821:android:ed82cd476b1158b4e7c82c",
+        "android_client_info": {
+          "package_name": "com.example.splitapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSsVw5B5uCdT4PbTVLySa2iJvcoJxK1os"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
