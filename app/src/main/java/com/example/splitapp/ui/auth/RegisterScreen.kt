@@ -3,6 +3,7 @@ package com.example.splitapp.ui.auth
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,10 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import com.example.splitapp.R
 import com.example.splitapp.ui.components.UserAvatar
 
 @Composable
@@ -124,6 +127,14 @@ fun RegisterScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+        Image(
+            painter = painterResource(R.drawable.logo_splitapp),
+            contentDescription = "Logo SplitApp",
+            modifier = Modifier
+                .size(80.dp)
+                .padding(bottom = 8.dp)
+        )
+
         Text(
             text = "Crear Cuenta",
             style = MaterialTheme.typography.headlineLarge,

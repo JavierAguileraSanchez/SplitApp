@@ -21,26 +21,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-sealed interface ExpensesUiState {
-    object Loading : ExpensesUiState
-    data class Success(val expenses: List<Expense>) : ExpensesUiState
-    data class Error(val message: String) : ExpensesUiState
-}
-
-sealed class AddExpenseState {
-    object Idle : AddExpenseState()
-    object Loading : AddExpenseState()
-    object Success : AddExpenseState()
-    data class Error(val message: String) : AddExpenseState()
-}
-
-sealed class SettleDebtState {
-    object Idle : SettleDebtState()
-    object Loading : SettleDebtState()
-    object Success : SettleDebtState()
-    data class Error(val message: String) : SettleDebtState()
-}
-
 class ExpenseViewModel(
     private val addExpenseUseCase: AddExpenseUseCase,
     private val getExpensesUseCase: GetExpensesUseCase,
@@ -92,19 +72,17 @@ class ExpenseViewModel(
             try {
                 val montoCentimos = amount.toCentimos()
                 val opId = UUID.randomUUID().toString()
-
-                val distribucionCentimos = if (customDistribution != null) {
+                val distribucionCentimos = if (customDistribution != null)
                     convertirDistribucionACentimos(customDistribution, montoCentimos)
-                } else {
+                else
                     distribuirJusto(montoCentimos, participantUids)
-                }
 
                 val validation = ExpenseValidator.validate(
-                    concepto       = title,
-                    montoCentimos  = montoCentimos,
-                    pagadorId      = paidBy,
+                    concepto             = title,
+                    montoCentimos        = montoCentimos,
+                    pagadorId            = paidBy,
                     distribucionCentimos = distribucionCentimos,
-                    miembrosActivos = participantUids
+                    miembrosActivos      = participantUids
                 )
                 if (validation.isFailure) {
                     _addExpenseState.value = AddExpenseState.Error(
@@ -123,7 +101,6 @@ class ExpenseViewModel(
                     clientOperationId = opId,
                     esPersonalizado = customDistribution != null
                 )
-
                 addExpenseUseCase(groupId, expense)
                     .onSuccess { _addExpenseState.value = AddExpenseState.Success; AnalyticsHelper.logExpenseAdded() }
                     .onFailure { _addExpenseState.value = AddExpenseState.Error(it.message ?: "Error al añadir gasto") }
@@ -139,11 +116,9 @@ class ExpenseViewModel(
         return transacciones
     }
 
-    // Liquida TODAS las transferencias en una única transacción Firestore
     fun settleDebt() {
         val transfers = _settlementTransactions.value
         if (transfers.isEmpty()) return
-
         viewModelScope.launch {
             _settleDebtState.value = SettleDebtState.Loading
             settleDebtUseCase(groupId, transfers)

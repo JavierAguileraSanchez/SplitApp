@@ -23,54 +23,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-sealed class CreateGroupState {
-    data object Idle : CreateGroupState()
-    data object Loading : CreateGroupState()
-    data object Success : CreateGroupState()
-    data class Error(val message: String) : CreateGroupState()
-}
-
-sealed class AddMemberState {
-    data object Idle : AddMemberState()
-    data object Loading : AddMemberState()
-    data object Success : AddMemberState()
-    data class Error(val message: String) : AddMemberState()
-}
-
-sealed class GroupActionState {
-    data object Idle : GroupActionState()
-    data object Loading : GroupActionState()
-    data object Success : GroupActionState()
-    data class Error(val message: String) : GroupActionState()
-}
-
-sealed class JoinGroupState {
-    data object Idle : JoinGroupState()
-    data object Loading : JoinGroupState()
-    data object Success : JoinGroupState()
-    data class Error(val message: String) : JoinGroupState()
-}
-
-data class GlobalBalanceState(
-    val totalQueDebo: Long = 0L,
-    val totalQueMeDeben: Long = 0L
-)
-
-data class UserSearchResult(val id: String = "", val nombre: String = "", val email: String = "")
-
-sealed class UserSearchState {
-    data object Idle : UserSearchState()
-    data object Loading : UserSearchState()
-    data class Success(val results: List<UserSearchResult>) : UserSearchState()
-    data class Error(val message: String) : UserSearchState()
-}
-
-sealed class ExportEvent {
-    data object Loading : ExportEvent()
-    data class Success(val filePath: String) : ExportEvent()
-    data class Error(val message: String) : ExportEvent()
-}
-
 class GroupViewModel(
     private val createGroupUseCase: CreateGroupUseCase,
     private val getGroupsUseCase: GetGroupsUseCase,
@@ -85,11 +37,7 @@ class GroupViewModel(
 
     val groups: StateFlow<List<Group>> = getGroupsUseCase(userId)
         .catch { emit(emptyList()) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = emptyList()
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), emptyList())
 
     val globalBalanceState: StateFlow<GlobalBalanceState> = groups
         .map { groupList ->
@@ -141,19 +89,11 @@ class GroupViewModel(
         }
     }
 
-    fun addMemberByEmail(
-        groupId: String,
-        email: String,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
-    ) {
+    fun addMemberByEmail(groupId: String, email: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             _addMemberState.value = AddMemberState.Loading
             addMemberUseCase(groupId, email)
-                .onSuccess {
-                    _addMemberState.value = AddMemberState.Success
-                    onSuccess()
-                }
+                .onSuccess { _addMemberState.value = AddMemberState.Success; onSuccess() }
                 .onFailure { e ->
                     val msg = e.message ?: "Error al agregar miembro"
                     _addMemberState.value = AddMemberState.Error(msg)
@@ -176,10 +116,7 @@ class GroupViewModel(
 
     fun searchUsers(query: String) {
         _searchQuery.value = query
-        if (query.isBlank()) {
-            _userSearchState.value = UserSearchState.Idle
-            return
-        }
+        if (query.isBlank()) { _userSearchState.value = UserSearchState.Idle; return }
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             _userSearchState.value = UserSearchState.Loading
@@ -226,11 +163,7 @@ class GroupViewModel(
         viewModelScope.launch {
             _joinGroupState.value = JoinGroupState.Loading
             groupRepository.joinGroupByDeepLink(groupId, currentUserId)
-                .onSuccess {
-                    _joinGroupState.value = JoinGroupState.Success
-                    AnalyticsHelper.logGroupJoined()
-                    onSuccess()
-                }
+                .onSuccess { _joinGroupState.value = JoinGroupState.Success; AnalyticsHelper.logGroupJoined(); onSuccess() }
                 .onFailure { e ->
                     val msg = e.message ?: "Error al unirse al grupo"
                     _joinGroupState.value = JoinGroupState.Error(msg)
