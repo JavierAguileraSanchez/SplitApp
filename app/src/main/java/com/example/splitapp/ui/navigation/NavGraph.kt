@@ -29,7 +29,8 @@ fun NavGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     groupViewModel: GroupViewModel,
-    getUserNamesUseCase: GetUserNamesUseCase
+    getUserNamesUseCase: GetUserNamesUseCase,
+    onLanguageChange: (String) -> Unit
 ) {
     val startDestination = if (FirebaseAuth.getInstance().currentUser != null) {
         Screen.GroupList.route
@@ -51,7 +52,8 @@ fun NavGraph(
                     navController.navigate(Screen.GroupList.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
-                }
+                },
+                onLanguageChange = onLanguageChange
             )
         }
 
@@ -94,7 +96,8 @@ fun NavGraph(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
+                onLanguageChange = onLanguageChange
             )
         }
 

@@ -26,7 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.ui.components.UserAvatar
 import com.example.splitapp.ui.group.AddMemberState
 import com.example.splitapp.ui.group.UserSearchState
@@ -51,7 +53,7 @@ fun AddMemberDialog(
             onResetSearch()
             onDismiss()
         },
-        title = { Text("Añadir miembro al grupo") },
+        title = { Text(stringResource(R.string.add_member_title)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
@@ -61,7 +63,7 @@ fun AddMemberDialog(
                         selectedUserId = ""
                         onSearchUsers(newValue)
                     },
-                    label = { Text("Buscar por nombre de usuario") },
+                    label = { Text(stringResource(R.string.add_member_search_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = addMemberState !is AddMemberState.Loading
                 )
@@ -107,7 +109,7 @@ fun AddMemberDialog(
                                 }
                             } else {
                                 Text(
-                                    text = "No se encontraron usuarios",
+                                    text = stringResource(R.string.add_member_no_results),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -141,7 +143,7 @@ fun AddMemberDialog(
                 onClick = { if (selectedUserId.isNotBlank()) onAddMember(selectedUserId) },
                 enabled = selectedUserId.isNotBlank() && addMemberState !is AddMemberState.Loading
             ) {
-                Text("Confirmar")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
@@ -153,7 +155,7 @@ fun AddMemberDialog(
                 },
                 enabled = addMemberState !is AddMemberState.Loading
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

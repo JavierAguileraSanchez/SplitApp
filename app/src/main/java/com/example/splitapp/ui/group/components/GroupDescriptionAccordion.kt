@@ -19,7 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 
 @Composable
 fun GroupDescriptionAccordion(
@@ -43,14 +45,17 @@ fun GroupDescriptionAccordion(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Descripción del grupo",
+                text = stringResource(R.string.group_description_header),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
             Icon(
                 imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp
                               else Icons.Default.KeyboardArrowDown,
-                contentDescription = if (isExpanded) "Contraer" else "Expandir",
+                contentDescription = if (isExpanded)
+                    stringResource(R.string.group_description_collapse)
+                else
+                    stringResource(R.string.group_description_expand),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

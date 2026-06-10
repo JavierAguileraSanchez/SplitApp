@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.ui.group.JoinGroupState
 
 @Composable
@@ -30,14 +32,14 @@ fun JoinGroupDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
-        title = { Text("Unirse con enlace") },
+        title = { Text(stringResource(R.string.join_group_title)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = joinLinkInput,
                     onValueChange = onJoinLinkChange,
-                    label = { Text("Enlace o ID del grupo") },
-                    placeholder = { Text("splitapp://join?groupId=... o solo el ID") },
+                    label = { Text(stringResource(R.string.join_group_input_label)) },
+                    placeholder = { Text(stringResource(R.string.join_group_input_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading
                 )
@@ -66,11 +68,13 @@ fun JoinGroupDialog(
                 },
                 enabled = joinLinkInput.isNotBlank() && !isLoading
             ) {
-                Text("Unirse")
+                Text(stringResource(R.string.join_group_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancelar") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) {
+                Text(stringResource(R.string.cancel))
+            }
         }
     )
 }

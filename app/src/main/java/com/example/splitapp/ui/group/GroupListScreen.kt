@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
@@ -60,7 +61,8 @@ fun GroupListScreen(
     groupViewModel: GroupViewModel,
     onNavigateToGroupDetail: (String) -> Unit,
     onNavigateToLogin: () -> Unit,
-    deepLinkGroupId: String? = null
+    deepLinkGroupId: String? = null,
+    onLanguageChange: (String) -> Unit
 ) {
     var showCreateDialog by remember { mutableStateOf(false) }
     var showProfileDialog by remember { mutableStateOf(false) }
@@ -158,7 +160,8 @@ fun GroupListScreen(
             },
             onResetUploadPhoto = profileViewModel::resetUploadPhotoState,
             onDismiss = { showProfileDialog = false },
-            onLogout = { showProfileDialog = false; onNavigateToLogin() }
+            onLogout = { showProfileDialog = false; onNavigateToLogin() },
+            onLanguageChange = onLanguageChange
         )
     }
 
@@ -179,7 +182,7 @@ fun GroupListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis Grupos") },
+                title = { Text(stringResource(R.string.groups_title)) },
                 navigationIcon = {
                     Image(
                         painter = painterResource(R.drawable.logo_splitapp),
@@ -196,17 +199,17 @@ fun GroupListScreen(
                 ),
                 actions = {
                     IconButton(onClick = { showJoinDialog = true }) {
-                        Icon(Icons.Default.Link, contentDescription = "Unirse con enlace")
+                        Icon(Icons.Default.Link, contentDescription = stringResource(R.string.groups_join_link_cd))
                     }
                     IconButton(onClick = { showProfileDialog = true }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Perfil")
+                        Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.groups_profile_cd))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showCreateDialog = true }, modifier = Modifier.padding(16.dp)) {
-                Icon(Icons.Default.Add, contentDescription = "Crear Grupo")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.groups_create_cd))
             }
         }
     ) { innerPadding ->
@@ -230,7 +233,11 @@ fun GroupListScreen(
                         modifier = Modifier.fillMaxWidth().padding(18.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Total que debo", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+                        Text(
+                            stringResource(R.string.groups_total_owed),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = globalBalanceState.totalQueDebo.formatEuros(),
@@ -249,7 +256,11 @@ fun GroupListScreen(
                         modifier = Modifier.fillMaxWidth().padding(18.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text("Total que me deben", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                        Text(
+                            stringResource(R.string.groups_total_owed_to_me),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = globalBalanceState.totalQueMeDeben.formatEuros(),
@@ -265,11 +276,24 @@ fun GroupListScreen(
             if (groups.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.Group, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(68.dp))
+                        Icon(
+                            Icons.Default.Group,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(68.dp)
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("No tienes grupos", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            stringResource(R.string.groups_empty_title),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text("Presiona el botón + para crear uno", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.groups_empty_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             } else {

@@ -11,7 +11,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.ui.group.CreateGroupState
 
 @Composable
@@ -26,13 +28,13 @@ fun CreateGroupDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Crear Nuevo Grupo") },
+        title = { Text(stringResource(R.string.create_group_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = groupName,
                     onValueChange = onGroupNameChange,
-                    label = { Text("Nombre del grupo") },
+                    label = { Text(stringResource(R.string.create_group_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = createGroupState !is CreateGroupState.Loading
                 )
@@ -40,7 +42,7 @@ fun CreateGroupDialog(
                 OutlinedTextField(
                     value = groupDescription,
                     onValueChange = onGroupDescriptionChange,
-                    label = { Text("Descripción (opcional)") },
+                    label = { Text(stringResource(R.string.create_group_description_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = createGroupState !is CreateGroupState.Loading,
                     minLines = 2
@@ -60,7 +62,7 @@ fun CreateGroupDialog(
                 onClick = onConfirm,
                 enabled = createGroupState !is CreateGroupState.Loading && groupName.isNotBlank()
             ) {
-                Text("Crear")
+                Text(stringResource(R.string.create_group_confirm))
             }
         },
         dismissButton = {
@@ -68,7 +70,7 @@ fun CreateGroupDialog(
                 onClick = onDismiss,
                 enabled = createGroupState !is CreateGroupState.Loading
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

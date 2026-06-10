@@ -26,8 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
 import com.example.splitapp.ui.components.UserAvatar
 import com.example.splitapp.util.formatEuros
@@ -40,7 +42,7 @@ fun BalancesSection(
 ) {
     if (group.miembros.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "No hay miembros registrados", style = MaterialTheme.typography.bodyLarge)
+            Text(text = stringResource(R.string.balances_no_members), style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -48,7 +50,7 @@ fun BalancesSection(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Text(
-                text = "Balances actuales",
+                text = stringResource(R.string.balances_current),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
@@ -74,7 +76,7 @@ fun BalancesSection(
             onClick = onLiquidarDebt,
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             icon = { Icon(Icons.Default.SwapHoriz, contentDescription = null) },
-            text = { Text("Liquidar deuda") }
+            text = { Text(stringResource(R.string.balances_settle_debt)) }
         )
     }
 }
@@ -106,7 +108,7 @@ fun BalanceItem(
                     if (isInactive) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "inactivo",
+                            text = stringResource(R.string.balance_inactive),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -115,9 +117,9 @@ fun BalanceItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = when {
-                        balance > 0L -> "Le deben: ${balance.formatEuros()}"
-                        balance < 0L -> "Debe: ${(-balance).formatEuros()}"
-                        else -> "Saldo neutro"
+                        balance > 0L -> stringResource(R.string.balance_owed_to_them, balance.formatEuros())
+                        balance < 0L -> stringResource(R.string.balance_owes, (-balance).formatEuros())
+                        else -> stringResource(R.string.balance_neutral)
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = when {

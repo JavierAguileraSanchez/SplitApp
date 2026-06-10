@@ -1,5 +1,6 @@
 package com.example.splitapp
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,14 +26,25 @@ import com.example.splitapp.ui.auth.AuthViewModel
 import com.example.splitapp.ui.group.GroupViewModel
 import com.example.splitapp.ui.navigation.NavGraph
 import com.example.splitapp.ui.theme.SplitAppTheme
+import com.example.splitapp.util.LocaleManager
 
 class MainActivity : ComponentActivity() {
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleManager.applyLocale(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SplitAppTheme {
-                SplitAppNavigation()
+                SplitAppNavigation(
+                    onLanguageChange = { language ->
+                        LocaleManager.setLanguage(this, language)
+                        recreate()
+                    }
+                )
             }
         }
     }
@@ -55,7 +67,7 @@ fun rememberFirebaseAuthUserId(): String {
 }
 
 @Composable
-fun SplitAppNavigation() {
+fun SplitAppNavigation(onLanguageChange: (String) -> Unit) {
     val navController = rememberNavController()
     val authRepository = remember { AuthRepositoryImpl() }
     val groupRepository = remember { GroupRepositoryImpl() }
@@ -81,6 +93,7 @@ fun SplitAppNavigation() {
         navController = navController,
         authViewModel = authViewModel,
         groupViewModel = groupViewModel,
-        getUserNamesUseCase = getUserNamesUseCase
+        getUserNamesUseCase = getUserNamesUseCase,
+        onLanguageChange = onLanguageChange
     )
 }

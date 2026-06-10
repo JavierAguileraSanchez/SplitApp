@@ -1,0 +1,159 @@
+<resources>
+    <string name="app_name">SplitApp</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="email_label">Email</string>
+    <string name="retry">Reintentar</string>
+    <string name="choose_from_gallery">Elegir de la galería</string>
+    <string name="take_photo">Tomar foto</string>
+
+    <!-- Language -->
+    <string name="lang_en">EN</string>
+    <string name="lang_es">ES</string>
+    <string name="language">Idioma</string>
+    <string name="lang_english">Inglés</string>
+    <string name="lang_spanish">Español</string>
+
+    <!-- Login -->
+    <string name="login_subtitle">Gestiona tus gastos compartidos</string>
+    <string name="login_email_error">Formato de email inválido</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="login_register_link">¿No tienes cuenta? Regístrate aquí</string>
+    <string name="login_logo_cd">Logo SplitApp</string>
+
+    <!-- Register -->
+    <string name="register_title">Crear Cuenta</string>
+    <string name="register_add_photo_cd">Añadir foto</string>
+    <string name="register_name_label">Nombre de usuario</string>
+    <string name="register_name_hint">Sin espacios · %1$d/15 caracteres</string>
+    <string name="register_button">Registrarse</string>
+    <string name="register_login_link">¿Ya tienes cuenta? Inicia sesión aquí</string>
+    <string name="register_photo_dialog_title">Foto de perfil</string>
+
+    <!-- Group List -->
+    <string name="groups_title">Mis Grupos</string>
+    <string name="groups_join_link_cd">Unirse con enlace</string>
+    <string name="groups_profile_cd">Perfil</string>
+    <string name="groups_create_cd">Crear Grupo</string>
+    <string name="groups_total_owed">Total que debo</string>
+    <string name="groups_total_owed_to_me">Total que me deben</string>
+    <string name="groups_empty_title">No tienes grupos</string>
+    <string name="groups_empty_hint">Presiona el botón + para crear uno</string>
+
+    <!-- Group Detail -->
+    <string name="group_detail_fallback">Detalle del Grupo</string>
+    <string name="group_loading">Cargando grupo…</string>
+    <string name="group_not_found">Grupo no encontrado</string>
+    <string name="group_share_cd">Compartir enlace de invitación</string>
+    <string name="group_add_member_cd">Agregar miembro</string>
+    <string name="group_more_options_cd">Más opciones</string>
+    <string name="group_export_expenses">Exportar gastos</string>
+    <string name="group_delete">Eliminar grupo</string>
+    <string name="group_leave">Salirse del grupo</string>
+    <string name="group_add_expense_cd">Añadir gasto</string>
+    <string name="group_tab_balances">Balances</string>
+    <string name="group_tab_expenses">Gastos</string>
+    <string name="group_back_cd">Atrás</string>
+    <string name="group_link_copied">Enlace de invitación copiado</string>
+    <string name="group_invitation_link_label">Enlace de invitación</string>
+    <string name="group_export_success">Historial exportado con éxito en %1$s</string>
+
+    <!-- Add Expense Dialog -->
+    <string name="add_expense_title">Añadir nuevo gasto</string>
+    <string name="add_expense_title_label">Título</string>
+    <string name="add_expense_amount_label">Monto</string>
+    <string name="add_expense_paid_by">Pagado por</string>
+    <string name="add_expense_custom_split">División personalizada</string>
+    <string name="add_expense_split_mode">Modo de división</string>
+    <string name="add_expense_split_amount">Monto</string>
+    <string name="add_expense_split_percentage">Porcentaje</string>
+    <string name="add_expense_enter_value">Introduce %1$s por participante</string>
+    <string name="add_expense_who_participates">¿Quiénes participan?</string>
+    <string name="add_expense_impact_summary">Resumen de Impacto</string>
+    <string name="add_expense_missing_amount">Faltan %1$s para completar el total</string>
+    <string name="add_expense_over_amount">Te pasas por %1$s</string>
+    <string name="add_expense_invalid_amount">Ingresa un monto total válido</string>
+    <string name="add_expense_no_participants">Selecciona al menos un participante</string>
+    <string name="add_expense_fill_split_values">Completa todos los valores de división personalizada</string>
+    <string name="add_expense_amounts_mismatch">La suma de los montos debe coincidir con el total</string>
+    <string name="add_expense_percentages_mismatch">La suma de los porcentajes debe ser 100%%</string>
+
+    <!-- Balances Section -->
+    <string name="balances_no_members">No hay miembros registrados</string>
+    <string name="balances_current">Balances actuales</string>
+    <string name="balances_settle_debt">Liquidar deuda</string>
+    <string name="balance_owed_to_them">Le deben: %1$s</string>
+    <string name="balance_owes">Debe: %1$s</string>
+    <string name="balance_neutral">Saldo neutro</string>
+    <string name="balance_inactive">inactivo</string>
+
+    <!-- Expenses Section -->
+    <string name="expenses_empty_title">Aún no hay gastos en este grupo</string>
+    <string name="expenses_empty_hint">Registra tu primer gasto para ver el resumen financiero</string>
+    <string name="expense_total">Total: %1$s</string>
+    <string name="expense_paid_by_label">Pagado por: %1$s</string>
+    <string name="expense_date_label">Fecha: %1$s</string>
+    <string name="expense_delete_title">Eliminar gasto</string>
+    <string name="expense_delete_confirm">¿Eliminar \"%1$s\"? Los balances del grupo se actualizarán.</string>
+    <string name="expense_delete_button">Eliminar</string>
+    <string name="expense_delete_cd">Eliminar gasto</string>
+
+    <!-- Settle Debt Dialog -->
+    <string name="settle_title">Liquidar deuda</string>
+    <string name="settle_description">Para ponerse al día:</string>
+    <string name="settle_no_debts">No hay deudas pendientes.</string>
+    <string name="settle_transfer">• %1$s debe pagar %2$s a %3$s</string>
+    <string name="settle_confirm">Confirmar Pago</string>
+
+    <!-- Add Member Dialog -->
+    <string name="add_member_title">Añadir miembro al grupo</string>
+    <string name="add_member_search_label">Buscar por nombre de usuario</string>
+    <string name="add_member_no_results">No se encontraron usuarios</string>
+
+    <!-- Create Group Dialog -->
+    <string name="create_group_title">Crear Nuevo Grupo</string>
+    <string name="create_group_name_label">Nombre del grupo</string>
+    <string name="create_group_description_label">Descripción (opcional)</string>
+    <string name="create_group_confirm">Crear</string>
+
+    <!-- Join Group Dialog -->
+    <string name="join_group_title">Unirse con enlace</string>
+    <string name="join_group_input_label">Enlace o ID del grupo</string>
+    <string name="join_group_input_placeholder">splitapp://join?groupId=… o solo el ID</string>
+    <string name="join_group_confirm">Unirse</string>
+
+    <!-- Group Card -->
+    <string name="group_active_members">Miembros activos: %1$d</string>
+    <string name="group_card_owed_to_me">Me deben: %1$s</string>
+    <string name="group_card_i_owe">Les debo: %1$s</string>
+    <string name="group_card_balance">Saldo: %1$s</string>
+
+    <!-- Group Description Accordion -->
+    <string name="group_description_header">Descripción del grupo</string>
+    <string name="group_description_collapse">Contraer</string>
+    <string name="group_description_expand">Expandir</string>
+
+    <!-- Group Action Confirm Dialog -->
+    <string name="group_action_delete_confirm">¿Quieres eliminar este grupo? Esta acción no se puede deshacer.</string>
+    <string name="group_action_leave_confirm">¿Quieres salirte de este grupo?</string>
+    <string name="group_action_delete_button">Eliminar grupo</string>
+    <string name="group_action_leave_button">Salirse del grupo</string>
+
+    <!-- Profile Dialog -->
+    <string name="profile_title">Perfil</string>
+    <string name="profile_change_photo_title">Cambiar foto de perfil</string>
+    <string name="profile_change_photo">Cambiar foto</string>
+    <string name="profile_name_label">Nombre</string>
+    <string name="profile_name_hint">Sin espacios · %1$d/15 caracteres</string>
+    <string name="profile_email_label">Email: %1$s</string>
+    <string name="profile_role_admin">Rol: Administrador</string>
+    <string name="profile_role_user">Rol: Usuario</string>
+    <string name="profile_save">Guardar cambios</string>
+    <string name="profile_close">Cerrar</string>
+    <string name="profile_logout">Cerrar Sesión</string>
+    <string name="profile_updated">Perfil actualizado correctamente</string>
+    <string name="profile_load_error">No se pudo cargar el perfil</string>
+</resources>

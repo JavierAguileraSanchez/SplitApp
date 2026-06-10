@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.domain.usecase.group.Transferencia
 import com.example.splitapp.util.formatEuros
 
@@ -30,17 +32,17 @@ fun SettleDebtDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Liquidar deuda") },
+        title = { Text(stringResource(R.string.settle_title)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Para ponerse al día:",
+                    text = stringResource(R.string.settle_description),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 if (transactions.isEmpty()) {
                     Text(
-                        text = "No hay deudas pendientes.",
+                        text = stringResource(R.string.settle_no_debts),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 } else {
@@ -48,7 +50,12 @@ fun SettleDebtDialog(
                         val deudorName = userNames[transaction.deudor] ?: transaction.deudor
                         val acreedorName = userNames[transaction.acreedor] ?: transaction.acreedor
                         Text(
-                            text = "• $deudorName debe pagar ${transaction.montoCentimos.formatEuros()} a $acreedorName",
+                            text = stringResource(
+                                R.string.settle_transfer,
+                                deudorName,
+                                transaction.montoCentimos.formatEuros(),
+                                acreedorName
+                            ),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Spacer(modifier = Modifier.height(6.dp))
@@ -66,11 +73,13 @@ fun SettleDebtDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm, enabled = !isLoading && transactions.isNotEmpty()) {
-                Text("Confirmar Pago")
+                Text(stringResource(R.string.settle_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancelar") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) {
+                Text(stringResource(R.string.cancel))
+            }
         }
     )
 }

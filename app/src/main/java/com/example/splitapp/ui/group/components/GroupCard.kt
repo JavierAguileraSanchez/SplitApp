@@ -15,8 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
 import com.example.splitapp.util.formatEuros
 
@@ -41,15 +43,15 @@ fun GroupCard(
             Text(text = group.nombreGrupo, style = MaterialTheme.typography.headlineSmall)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Miembros activos: ${group.miembrosActivos.size}",
+                text = stringResource(R.string.group_active_members, group.miembrosActivos.size),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(14.dp))
             val (balanceLabel, balanceColor) = when {
-                userBalance > 10L  -> "Me deben: ${userBalance.formatEuros()}" to MaterialTheme.colorScheme.primary
-                userBalance < -10L -> "Les debo: ${(-userBalance).formatEuros()}" to MaterialTheme.colorScheme.error
-                else               -> "Saldo: ${userBalance.formatEuros()}" to MaterialTheme.colorScheme.onSurfaceVariant
+                userBalance > 10L  -> stringResource(R.string.group_card_owed_to_me, userBalance.formatEuros()) to MaterialTheme.colorScheme.primary
+                userBalance < -10L -> stringResource(R.string.group_card_i_owe, (-userBalance).formatEuros()) to MaterialTheme.colorScheme.error
+                else               -> stringResource(R.string.group_card_balance, userBalance.formatEuros()) to MaterialTheme.colorScheme.onSurfaceVariant
             }
             Text(
                 text = balanceLabel,

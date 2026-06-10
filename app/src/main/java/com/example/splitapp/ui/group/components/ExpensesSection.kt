@@ -34,8 +34,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.data.model.Expense
 import com.example.splitapp.ui.group.GroupExpensesPieChart
 import com.example.splitapp.util.formatEuros
@@ -59,13 +61,13 @@ fun ExpensesSection(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Aún no hay gastos en este grupo",
+                    text = stringResource(R.string.expenses_empty_title),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Registra tu primer gasto para ver el resumen financiero",
+                    text = stringResource(R.string.expenses_empty_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -107,16 +109,18 @@ fun ExpenseItem(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Eliminar gasto") },
-            text = { Text("¿Eliminar \"${expense.concepto}\"? Los balances del grupo se actualizarán.") },
+            title = { Text(stringResource(R.string.expense_delete_title)) },
+            text = { Text(stringResource(R.string.expense_delete_confirm, expense.concepto)) },
             confirmButton = {
                 Button(
                     onClick = { onDeleteExpense(expense.id); showDeleteConfirm = false },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text("Eliminar") }
+                ) { Text(stringResource(R.string.expense_delete_button)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") }
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }
@@ -145,23 +149,29 @@ fun ExpenseItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar gasto",
+                        contentDescription = stringResource(R.string.expense_delete_cd),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Total: ${expense.montoCentimos.formatEuros()}",
+                text = stringResource(R.string.expense_total, expense.montoCentimos.formatEuros()),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(6.dp))
             val payerName = userNames[expense.pagadoPor] ?: expense.pagadoPor
-            Text(text = "Pagado por: $payerName", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(R.string.expense_paid_by_label, payerName),
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Fecha: ${expense.createdAt?.toDate()?.formatToDisplay() ?: "—"}",
+                text = stringResource(
+                    R.string.expense_date_label,
+                    expense.createdAt?.toDate()?.formatToDisplay() ?: "—"
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

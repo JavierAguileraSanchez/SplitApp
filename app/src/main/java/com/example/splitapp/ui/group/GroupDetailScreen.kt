@@ -43,7 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.domain.usecase.group.Transferencia
 import com.example.splitapp.ui.expense.AddExpenseState
 import com.example.splitapp.ui.expense.ExpensesUiState
@@ -91,7 +93,6 @@ fun GroupDetailScreen(
     var isDescriptionExpanded by remember { mutableStateOf(false) }
     var optimizedTransactions by remember { mutableStateOf<List<Transferencia>>(emptyList()) }
 
-    // Estado de AddExpenseDialog
     var addTitle by remember { mutableStateOf("") }
     var addAmount by remember { mutableStateOf("") }
     var selectedPagadorId by remember { mutableStateOf(currentUserId) }
@@ -103,6 +104,19 @@ fun GroupDetailScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    // Pre-resolved strings for use inside LaunchedEffect / lambdas
+    val linkCopiedMsg = stringResource(R.string.group_link_copied)
+    val invLinkLabel = stringResource(R.string.group_invitation_link_label)
+    val exportSuccessTemplate = stringResource(R.string.group_export_success)
+    val invalidAmountMsg = stringResource(R.string.add_expense_invalid_amount)
+    val noParticipantsMsg = stringResource(R.string.add_expense_no_participants)
+    val fillSplitMsg = stringResource(R.string.add_expense_fill_split_values)
+    val amountsMismatchMsg = stringResource(R.string.add_expense_amounts_mismatch)
+    val pctMismatchMsg = stringResource(R.string.add_expense_percentages_mismatch)
+    val groupDetailFallback = stringResource(R.string.group_detail_fallback)
+    val groupLoadingMsg = stringResource(R.string.group_loading)
+    val groupNotFoundMsg = stringResource(R.string.group_not_found)
 
     LaunchedEffect(showAddExpenseDialog, group?.miembrosActivos) {
         if (showAddExpenseDialog) {
@@ -137,7 +151,7 @@ fun GroupDetailScreen(
     LaunchedEffect(Unit) {
         groupViewModel.exportEvent.collect { event ->
             when (event) {
-                is ExportEvent.Success -> snackbarHostState.showSnackbar("Historial exportado con éxito en ${event.filePath}")
+                is ExportEvent.Success -> snackbarHostState.showSnackbar(String.format(exportSuccessTemplate, event.filePath))
                 is ExportEvent.Error   -> snackbarHostState.showSnackbar(event.message)
                 is ExportEvent.Loading -> {}
             }
@@ -154,11 +168,11 @@ fun GroupDetailScreen(
 
     val customSplitValidationMessage = when {
         !customSplitEnabled -> null
-        totalAmount <= 0.0  -> "Ingresa un monto total válido"
-        activeParticipants.isEmpty() -> "Selecciona al menos un participante"
-        activeParticipants.any { customSplitValues[it].isNullOrBlank() } -> "Completa todos los valores de división personalizada"
-        customSplitMode == SplitMode.Amounts && abs(customSplitSum - totalAmount) > 0.01 -> "La suma de los montos debe coincidir con el total"
-        customSplitMode == SplitMode.Percentages && abs(customSplitSum - 100.0) > 0.5 -> "La suma de los porcentajes debe ser 100%"
+        totalAmount <= 0.0  -> invalidAmountMsg
+        activeParticipants.isEmpty() -> noParticipantsMsg
+        activeParticipants.any { customSplitValues[it].isNullOrBlank() } -> fillSplitMsg
+        customSplitMode == SplitMode.Amounts && abs(customSplitSum - totalAmount) > 0.01 -> amountsMismatchMsg
+        customSplitMode == SplitMode.Percentages && abs(customSplitSum - 100.0) > 0.5 -> pctMismatchMsg
         else -> null
     }
 
@@ -166,7 +180,7 @@ fun GroupDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(group?.nombreGrupo ?: "Detalle del Grupo") },
+                title = { Text(group?.nombreGrupo ?: groupDetailFallback) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -175,28 +189,28 @@ fun GroupDetailScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.group_back_cd))
                     }
                 },
                 actions = {
                     IconButton(onClick = {
                         val link = "splitapp://join?groupId=$groupId"
                         val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Enlace de invitación", link))
-                        scope.launch { snackbarHostState.showSnackbar("Enlace de invitación copiado") }
+                        clipboard.setPrimaryClip(android.content.ClipData.newPlainText(invLinkLabel, link))
+                        scope.launch { snackbarHostState.showSnackbar(linkCopiedMsg) }
                     }) {
-                        Icon(Icons.Default.Share, contentDescription = "Compartir enlace de invitación")
+                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.group_share_cd))
                     }
                     IconButton(onClick = { showAddMemberDialog = true }) {
-                        Icon(Icons.Default.PersonAdd, contentDescription = "Agregar miembro")
+                        Icon(Icons.Default.PersonAdd, contentDescription = stringResource(R.string.group_add_member_cd))
                     }
                     Box {
                         IconButton(onClick = { showTopBarMenu = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.group_more_options_cd))
                         }
                         DropdownMenu(expanded = showTopBarMenu, onDismissRequest = { showTopBarMenu = false }) {
                             DropdownMenuItem(
-                                text = { Text("Exportar gastos") },
+                                text = { Text(stringResource(R.string.group_export_expenses)) },
                                 leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
                                 onClick = {
                                     val externalDir = context.getExternalFilesDir(null)
@@ -206,7 +220,7 @@ fun GroupDetailScreen(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(if (isCreator) "Eliminar grupo" else "Salirse del grupo") },
+                                text = { Text(if (isCreator) stringResource(R.string.group_delete) else stringResource(R.string.group_leave)) },
                                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null) },
                                 onClick = { showGroupActionDialog = true; showTopBarMenu = false }
                             )
@@ -217,7 +231,7 @@ fun GroupDetailScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddExpenseDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir gasto")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.group_add_expense_cd))
             }
         },
         floatingActionButtonPosition = FabPosition.End
@@ -228,7 +242,7 @@ fun GroupDetailScreen(
             if (group == null) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = if (groups.isEmpty()) "Cargando grupo..." else "Grupo no encontrado",
+                        text = if (groups.isEmpty()) groupLoadingMsg else groupNotFoundMsg,
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -242,8 +256,16 @@ fun GroupDetailScreen(
                     onToggle = { isDescriptionExpanded = !isDescriptionExpanded }
                 )
                 PrimaryTabRow(selectedTabIndex = selectedTab) {
-                    Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("Balances") })
-                    Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("Gastos") })
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text(stringResource(R.string.group_tab_balances)) }
+                    )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text(stringResource(R.string.group_tab_expenses)) }
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (selectedTab == 0) {

@@ -32,8 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
 import kotlin.math.abs
 
@@ -66,7 +68,11 @@ fun AddExpenseDialog(
     onConfirm: () -> Unit
 ) {
     val participantesActivos = selectedParticipants.filter { it.value }.keys
-    val splitHint = if (customSplitMode == SplitMode.Percentages) "Porcentaje" else "Monto"
+    val splitAmountLabel = stringResource(R.string.add_expense_split_amount)
+    val splitPctLabel = stringResource(R.string.add_expense_split_percentage)
+    val splitHint = if (customSplitMode == SplitMode.Percentages) splitPctLabel else splitAmountLabel
+    val missingTemplate = stringResource(R.string.add_expense_missing_amount)
+    val overTemplate = stringResource(R.string.add_expense_over_amount)
     var pagadorExpanded by remember { mutableStateOf(false) }
 
     val perParticipantAmounts = participantesActivos.associateWith { memberId ->
@@ -84,14 +90,14 @@ fun AddExpenseDialog(
     val roundingDifference = (amountValue.toDoubleOrNull() ?: 0.0) - assignedTotal
     val roundingMessage = when {
         abs(roundingDifference) < 0.005 -> null
-        roundingDifference > 0 -> "Faltan ${String.format("%.2f", roundingDifference)}€ para completar el total"
-        else -> "Te pasas por ${String.format("%.2f", -roundingDifference)}€"
+        roundingDifference > 0 -> String.format(missingTemplate, "${String.format("%.2f", roundingDifference)}€")
+        else -> String.format(overTemplate, "${String.format("%.2f", -roundingDifference)}€")
     }
     val miembrosElegibles = group.miembrosActivos
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Añadir nuevo gasto") },
+        title = { Text(stringResource(R.string.add_expense_title)) },
         text = {
             Column(
                 modifier = Modifier
@@ -101,7 +107,7 @@ fun AddExpenseDialog(
                 OutlinedTextField(
                     value = titleValue,
                     onValueChange = onTitleChange,
-                    label = { Text("Título") },
+                    label = { Text(stringResource(R.string.add_expense_title_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading
                 )
@@ -109,7 +115,7 @@ fun AddExpenseDialog(
                 OutlinedTextField(
                     value = amountValue,
                     onValueChange = onAmountChange,
-                    label = { Text("Monto") },
+                    label = { Text(stringResource(R.string.add_expense_amount_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     enabled = !isLoading
@@ -123,7 +129,7 @@ fun AddExpenseDialog(
                         value = userNames[pagadorId] ?: pagadorId,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Pagado por") },
+                        label = { Text(stringResource(R.string.add_expense_paid_by)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pagadorExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -148,7 +154,7 @@ fun AddExpenseDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "División personalizada", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = stringResource(R.string.add_expense_custom_split), style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.weight(1f))
                     Switch(
                         checked = isCustomSplitEnabled,
@@ -158,7 +164,7 @@ fun AddExpenseDialog(
                 }
                 if (isCustomSplitEnabled) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(text = "Modo de división", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = stringResource(R.string.add_expense_split_mode), style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
@@ -166,7 +172,7 @@ fun AddExpenseDialog(
                             onClick = { onCustomSplitModeChange(SplitMode.Amounts) },
                             enabled = !isLoading
                         )
-                        Text(text = "Monto", modifier = Modifier.padding(start = 4.dp))
+                        Text(text = splitAmountLabel, modifier = Modifier.padding(start = 4.dp))
                         Spacer(modifier = Modifier.width(16.dp))
                         RadioButton(
                             selected = customSplitMode == SplitMode.Percentages,
@@ -177,7 +183,7 @@ fun AddExpenseDialog(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Introduce $splitHint por participante",
+                        text = stringResource(R.string.add_expense_enter_value, splitHint),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -214,7 +220,7 @@ fun AddExpenseDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                Text(text = "¿Quiénes participan?", style = MaterialTheme.typography.bodyMedium)
+                Text(text = stringResource(R.string.add_expense_who_participates), style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(modifier = Modifier.fillMaxWidth()) {
                     miembrosElegibles.forEach { memberId ->
@@ -239,7 +245,7 @@ fun AddExpenseDialog(
                 if (participantesActivos.isNotEmpty() && (amountValue.toDoubleOrNull() ?: 0.0) > 0.0) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Resumen de Impacto",
+                        text = stringResource(R.string.add_expense_impact_summary),
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -266,11 +272,13 @@ fun AddExpenseDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm, enabled = !isLoading && isConfirmEnabled) {
-                Text("Confirmar")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !isLoading) { Text("Cancelar") }
+            TextButton(onClick = onDismiss, enabled = !isLoading) {
+                Text(stringResource(R.string.cancel))
+            }
         }
     )
 }

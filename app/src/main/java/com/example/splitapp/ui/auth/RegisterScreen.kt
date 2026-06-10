@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -81,7 +82,7 @@ fun RegisterScreen(
     if (showPhotoOptions) {
         AlertDialog(
             onDismissRequest = { showPhotoOptions = false },
-            title = { Text("Foto de perfil") },
+            title = { Text(stringResource(R.string.register_photo_dialog_title)) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     TextButton(
@@ -91,7 +92,7 @@ fun RegisterScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Elegir de la galería")
+                        Text(stringResource(R.string.choose_from_gallery))
                     }
                     TextButton(
                         onClick = {
@@ -102,13 +103,15 @@ fun RegisterScreen(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Tomar foto")
+                        Text(stringResource(R.string.take_photo))
                     }
                 }
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { showPhotoOptions = false }) { Text("Cancelar") }
+                TextButton(onClick = { showPhotoOptions = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         )
     }
@@ -127,135 +130,131 @@ fun RegisterScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        Image(
-            painter = painterResource(R.drawable.logo_splitapp),
-            contentDescription = "Logo SplitApp",
-            modifier = Modifier
-                .size(80.dp)
-                .padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = "Crear Cuenta",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        Box(
-            modifier = Modifier
-                .size(96.dp)
-                .clickable { showPhotoOptions = true },
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            UserAvatar(
-                name = nombre.ifBlank { "?" },
-                photoUrl = photoUri?.toString(),
-                size = 96.dp
+            Image(
+                painter = painterResource(R.drawable.logo_splitapp),
+                contentDescription = stringResource(R.string.login_logo_cd),
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(bottom = 8.dp)
             )
-            Icon(
-                imageVector = Icons.Default.AddAPhoto,
-                contentDescription = "Añadir foto",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(28.dp)
+
+            Text(
+                text = stringResource(R.string.register_title),
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(bottom = 24.dp)
             )
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        OutlinedTextField(
-            value = nombre,
-            onValueChange = { newValue ->
-                val sanitized = newValue.replace(" ", "").lowercase()
-                if (sanitized.length <= 15) nombre = sanitized
-            },
-            label = { Text("Nombre de usuario") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = authState !is AuthUiState.Loading,
-            supportingText = {
-                Text(
-                    text = "Sin espacios · ${nombre.length}/15 caracteres",
-                    style = MaterialTheme.typography.labelSmall
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clickable { showPhotoOptions = true },
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                UserAvatar(
+                    name = nombre.ifBlank { "?" },
+                    photoUrl = photoUri?.toString(),
+                    size = 96.dp
+                )
+                Icon(
+                    imageVector = Icons.Default.AddAPhoto,
+                    contentDescription = stringResource(R.string.register_add_photo_cd),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            enabled = authState !is AuthUiState.Loading,
-            isError = email.isNotBlank() && !isEmailValid,
-            supportingText = if (email.isNotBlank() && !isEmailValid) {
-                { Text("Formato de email inválido") }
-            } else null
-        )
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { newValue ->
+                    val sanitized = newValue.replace(" ", "").lowercase()
+                    if (sanitized.length <= 15) nombre = sanitized
+                },
+                label = { Text(stringResource(R.string.register_name_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = authState !is AuthUiState.Loading,
+                supportingText = {
+                    Text(
+                        text = stringResource(R.string.register_name_hint, nombre.length),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            enabled = authState !is AuthUiState.Loading
-        )
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text(stringResource(R.string.email_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                enabled = authState !is AuthUiState.Loading,
+                isError = email.isNotBlank() && !isEmailValid,
+                supportingText = if (email.isNotBlank() && !isEmailValid) {
+                    { Text(stringResource(R.string.login_email_error)) }
+                } else null
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        when (authState) {
-            is AuthUiState.Loading -> {
-                CircularProgressIndicator()
-            }
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(stringResource(R.string.login_password_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                enabled = authState !is AuthUiState.Loading
+            )
 
-            is AuthUiState.Error -> {
-                Text(
-                    text = (authState as AuthUiState.Error).message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                Button(
-                    onClick = {
-                        authViewModel.register(nombre, email, password, photoUri)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Reintentar")
+            Spacer(modifier = Modifier.height(24.dp))
+
+            when (authState) {
+                is AuthUiState.Loading -> {
+                    CircularProgressIndicator()
+                }
+
+                is AuthUiState.Error -> {
+                    Text(
+                        text = (authState as AuthUiState.Error).message,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Button(
+                        onClick = { authViewModel.register(nombre, email, password, photoUri) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.retry))
+                    }
+                }
+
+                is AuthUiState.Success -> {
+                    CircularProgressIndicator()
+                }
+
+                is AuthUiState.Idle -> {
+                    Button(
+                        onClick = { authViewModel.register(nombre, email, password, photoUri) },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = isEmailValid
+                    ) {
+                        Text(stringResource(R.string.register_button))
+                    }
                 }
             }
 
-            is AuthUiState.Success -> {
-                CircularProgressIndicator()
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            is AuthUiState.Idle -> {
-                Button(
-                    onClick = { authViewModel.register(nombre, email, password, photoUri) },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = isEmailValid
-                ) {
-                    Text("Registrarse")
-                }
-            }
+            Text(
+                text = stringResource(R.string.register_login_link),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { onNavigateToLogin() }
+            )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "¿Ya tienes cuenta? Inicia sesión aquí",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable {
-                onNavigateToLogin()
-            }
-        )
-        } // close widthIn Column
     }
 }
 

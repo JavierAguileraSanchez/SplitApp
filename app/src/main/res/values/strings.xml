@@ -1,3 +1,159 @@
 <resources>
     <string name="app_name">SplitApp</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="email_label">Email</string>
+    <string name="retry">Retry</string>
+    <string name="choose_from_gallery">Choose from gallery</string>
+    <string name="take_photo">Take photo</string>
+
+    <!-- Language -->
+    <string name="lang_en">EN</string>
+    <string name="lang_es">ES</string>
+    <string name="language">Language</string>
+    <string name="lang_english">English</string>
+    <string name="lang_spanish">Spanish</string>
+
+    <!-- Login -->
+    <string name="login_subtitle">Manage your shared expenses</string>
+    <string name="login_email_error">Invalid email format</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_button">Sign In</string>
+    <string name="login_register_link">Don\'t have an account? Register here</string>
+    <string name="login_logo_cd">SplitApp Logo</string>
+
+    <!-- Register -->
+    <string name="register_title">Create Account</string>
+    <string name="register_add_photo_cd">Add photo</string>
+    <string name="register_name_label">Username</string>
+    <string name="register_name_hint">No spaces · %1$d/15 characters</string>
+    <string name="register_button">Register</string>
+    <string name="register_login_link">Already have an account? Sign in here</string>
+    <string name="register_photo_dialog_title">Profile photo</string>
+
+    <!-- Group List -->
+    <string name="groups_title">My Groups</string>
+    <string name="groups_join_link_cd">Join with link</string>
+    <string name="groups_profile_cd">Profile</string>
+    <string name="groups_create_cd">Create Group</string>
+    <string name="groups_total_owed">Total I owe</string>
+    <string name="groups_total_owed_to_me">Total owed to me</string>
+    <string name="groups_empty_title">No groups</string>
+    <string name="groups_empty_hint">Press the + button to create one</string>
+
+    <!-- Group Detail -->
+    <string name="group_detail_fallback">Group Detail</string>
+    <string name="group_loading">Loading group…</string>
+    <string name="group_not_found">Group not found</string>
+    <string name="group_share_cd">Share invitation link</string>
+    <string name="group_add_member_cd">Add member</string>
+    <string name="group_more_options_cd">More options</string>
+    <string name="group_export_expenses">Export expenses</string>
+    <string name="group_delete">Delete group</string>
+    <string name="group_leave">Leave group</string>
+    <string name="group_add_expense_cd">Add expense</string>
+    <string name="group_tab_balances">Balances</string>
+    <string name="group_tab_expenses">Expenses</string>
+    <string name="group_back_cd">Back</string>
+    <string name="group_link_copied">Invitation link copied</string>
+    <string name="group_invitation_link_label">Invitation link</string>
+    <string name="group_export_success">History exported successfully at %1$s</string>
+
+    <!-- Add Expense Dialog -->
+    <string name="add_expense_title">Add new expense</string>
+    <string name="add_expense_title_label">Title</string>
+    <string name="add_expense_amount_label">Amount</string>
+    <string name="add_expense_paid_by">Paid by</string>
+    <string name="add_expense_custom_split">Custom split</string>
+    <string name="add_expense_split_mode">Split mode</string>
+    <string name="add_expense_split_amount">Amount</string>
+    <string name="add_expense_split_percentage">Percentage</string>
+    <string name="add_expense_enter_value">Enter %1$s per participant</string>
+    <string name="add_expense_who_participates">Who participates?</string>
+    <string name="add_expense_impact_summary">Impact Summary</string>
+    <string name="add_expense_missing_amount">Missing %1$s to complete the total</string>
+    <string name="add_expense_over_amount">You\'re over by %1$s</string>
+    <string name="add_expense_invalid_amount">Enter a valid total amount</string>
+    <string name="add_expense_no_participants">Select at least one participant</string>
+    <string name="add_expense_fill_split_values">Complete all custom split values</string>
+    <string name="add_expense_amounts_mismatch">The sum of amounts must match the total</string>
+    <string name="add_expense_percentages_mismatch">The sum of percentages must be 100%%</string>
+
+    <!-- Balances Section -->
+    <string name="balances_no_members">No registered members</string>
+    <string name="balances_current">Current balances</string>
+    <string name="balances_settle_debt">Settle debt</string>
+    <string name="balance_owed_to_them">Owed to them: %1$s</string>
+    <string name="balance_owes">Owes: %1$s</string>
+    <string name="balance_neutral">Neutral balance</string>
+    <string name="balance_inactive">inactive</string>
+
+    <!-- Expenses Section -->
+    <string name="expenses_empty_title">No expenses yet in this group</string>
+    <string name="expenses_empty_hint">Record your first expense to see the financial summary</string>
+    <string name="expense_total">Total: %1$s</string>
+    <string name="expense_paid_by_label">Paid by: %1$s</string>
+    <string name="expense_date_label">Date: %1$s</string>
+    <string name="expense_delete_title">Delete expense</string>
+    <string name="expense_delete_confirm">Delete \"%1$s\"? Group balances will be updated.</string>
+    <string name="expense_delete_button">Delete</string>
+    <string name="expense_delete_cd">Delete expense</string>
+
+    <!-- Settle Debt Dialog -->
+    <string name="settle_title">Settle debt</string>
+    <string name="settle_description">To get up to date:</string>
+    <string name="settle_no_debts">No pending debts.</string>
+    <string name="settle_transfer">• %1$s must pay %2$s to %3$s</string>
+    <string name="settle_confirm">Confirm Payment</string>
+
+    <!-- Add Member Dialog -->
+    <string name="add_member_title">Add member to group</string>
+    <string name="add_member_search_label">Search by username</string>
+    <string name="add_member_no_results">No users found</string>
+
+    <!-- Create Group Dialog -->
+    <string name="create_group_title">Create New Group</string>
+    <string name="create_group_name_label">Group name</string>
+    <string name="create_group_description_label">Description (optional)</string>
+    <string name="create_group_confirm">Create</string>
+
+    <!-- Join Group Dialog -->
+    <string name="join_group_title">Join with link</string>
+    <string name="join_group_input_label">Link or group ID</string>
+    <string name="join_group_input_placeholder">splitapp://join?groupId=… or just the ID</string>
+    <string name="join_group_confirm">Join</string>
+
+    <!-- Group Card -->
+    <string name="group_active_members">Active members: %1$d</string>
+    <string name="group_card_owed_to_me">They owe me: %1$s</string>
+    <string name="group_card_i_owe">I owe: %1$s</string>
+    <string name="group_card_balance">Balance: %1$s</string>
+
+    <!-- Group Description Accordion -->
+    <string name="group_description_header">Group description</string>
+    <string name="group_description_collapse">Collapse</string>
+    <string name="group_description_expand">Expand</string>
+
+    <!-- Group Action Confirm Dialog -->
+    <string name="group_action_delete_confirm">Do you want to delete this group? This action cannot be undone.</string>
+    <string name="group_action_leave_confirm">Do you want to leave this group?</string>
+    <string name="group_action_delete_button">Delete group</string>
+    <string name="group_action_leave_button">Leave group</string>
+
+    <!-- Profile Dialog -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_change_photo_title">Change profile photo</string>
+    <string name="profile_change_photo">Change photo</string>
+    <string name="profile_name_label">Name</string>
+    <string name="profile_name_hint">No spaces · %1$d/15 characters</string>
+    <string name="profile_email_label">Email: %1$s</string>
+    <string name="profile_role_admin">Role: Administrator</string>
+    <string name="profile_role_user">Role: User</string>
+    <string name="profile_save">Save changes</string>
+    <string name="profile_close">Close</string>
+    <string name="profile_logout">Sign Out</string>
+    <string name="profile_updated">Profile updated successfully</string>
+    <string name="profile_load_error">Could not load profile</string>
 </resources>

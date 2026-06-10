@@ -14,7 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.splitapp.R
 
 @Composable
 fun GroupActionConfirmDialog(
@@ -33,9 +35,9 @@ fun GroupActionConfirmDialog(
             Column {
                 Text(
                     text = if (isCreator)
-                        "¿Quieres eliminar este grupo? Esta acción no se puede deshacer."
+                        stringResource(R.string.group_action_delete_confirm)
                     else
-                        "¿Quieres salirte de este grupo?",
+                        stringResource(R.string.group_action_leave_confirm),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 if (errorMessage != null) {
@@ -60,12 +62,15 @@ fun GroupActionConfirmDialog(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text(if (isCreator) "Eliminar grupo" else "Salirse del grupo")
+                Text(
+                    if (isCreator) stringResource(R.string.group_action_delete_button)
+                    else stringResource(R.string.group_action_leave_button)
+                )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isLoading) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
