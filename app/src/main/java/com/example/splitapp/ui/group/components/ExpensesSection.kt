@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
 import com.example.splitapp.data.model.Expense
 import com.example.splitapp.ui.group.GroupExpensesPieChart
-import com.example.splitapp.util.formatEuros
+import com.example.splitapp.util.formatMoney
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -48,6 +48,7 @@ import java.util.Locale
 fun ExpensesSection(
     expenses: List<Expense>,
     userNames: Map<String, String>,
+    moneda: String,
     onDeleteExpense: (String) -> Unit
 ) {
     if (expenses.isEmpty()) {
@@ -91,6 +92,7 @@ fun ExpensesSection(
                 ExpenseItem(
                     expense = expense,
                     userNames = userNames,
+                    moneda = moneda,
                     onDeleteExpense = onDeleteExpense
                 )
             }
@@ -102,6 +104,7 @@ fun ExpensesSection(
 fun ExpenseItem(
     expense: Expense,
     userNames: Map<String, String>,
+    moneda: String,
     onDeleteExpense: (String) -> Unit
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -156,7 +159,7 @@ fun ExpenseItem(
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = stringResource(R.string.expense_total, expense.montoCentimos.formatEuros()),
+                text = stringResource(R.string.expense_total, expense.montoCentimos.formatMoney(moneda)),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.primary
             )

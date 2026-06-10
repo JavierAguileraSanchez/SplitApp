@@ -269,7 +269,7 @@ fun GroupDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (selectedTab == 0) {
-                    BalancesSection(group = group, userNames = miembrosNombres, onLiquidarDebt = { showSettleDebtDialog = true })
+                    BalancesSection(group = group, userNames = miembrosNombres, moneda = group.moneda, onLiquidarDebt = { showSettleDebtDialog = true })
                 } else {
                     when (val state = expensesState) {
                         is ExpensesUiState.Loading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -279,6 +279,7 @@ fun GroupDetailScreen(
                         is ExpensesUiState.Success -> ExpensesSection(
                             expenses = state.expenses,
                             userNames = miembrosNombres,
+                            moneda = group.moneda,
                             onDeleteExpense = { expenseViewModel.deleteExpense(it) }
                         )
                     }
@@ -306,6 +307,7 @@ fun GroupDetailScreen(
             onTitleChange = { addTitle = it },
             amountValue = addAmount,
             onAmountChange = { addAmount = it },
+            moneda = group.moneda,
             isLoading = addExpenseState is AddExpenseState.Loading,
             errorMessage = (addExpenseState as? AddExpenseState.Error)?.message,
             isConfirmEnabled = (!customSplitEnabled && selectedParticipants.any { it.value }) || (customSplitEnabled && customSplitValid),
@@ -332,6 +334,7 @@ fun GroupDetailScreen(
         SettleDebtDialog(
             transactions = optimizedTransactions,
             userNames = miembrosNombres,
+            moneda = group.moneda,
             isLoading = settleDebtState is SettleDebtState.Loading,
             errorMessage = (settleDebtState as? SettleDebtState.Error)?.message,
             onDismiss = { showSettleDebtDialog = false; expenseViewModel.resetSettleDebtState() },

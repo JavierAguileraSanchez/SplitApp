@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
+import com.example.splitapp.util.formatMoney
 import kotlin.math.abs
 
 enum class SplitMode { Amounts, Percentages }
@@ -64,6 +65,7 @@ fun AddExpenseDialog(
     isLoading: Boolean,
     errorMessage: String?,
     isConfirmEnabled: Boolean,
+    moneda: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -251,7 +253,7 @@ fun AddExpenseDialog(
                     Spacer(modifier = Modifier.height(8.dp))
                     perParticipantAmounts.forEach { (memberId, amount) ->
                         Text(
-                            text = "• ${userNames[memberId] ?: memberId}: ${String.format("%.2f", amount)}€",
+                            text = "• ${userNames[memberId] ?: memberId}: ${(amount * 100).toLong().formatMoney(moneda)}",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }

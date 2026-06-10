@@ -16,7 +16,8 @@ class GroupRepositoryImpl : FirestoreRepository(), GroupRepository {
     override suspend fun createGroup(
         nombreGrupo: String,
         creadorId: String,
-        descripcion: String
+        descripcion: String,
+        moneda: String
     ): Result<Unit> = runCatching {
         val newGroup = Group(
             nombreGrupo = nombreGrupo,
@@ -24,7 +25,8 @@ class GroupRepositoryImpl : FirestoreRepository(), GroupRepository {
             miembrosActivos = listOf(creadorId),
             estadoMiembros = mapOf(creadorId to true),
             balancesCentimos = mapOf(creadorId to 0L),
-            descripcion = descripcion
+            descripcion = descripcion,
+            moneda = moneda
         )
         withContext(Dispatchers.IO) {
             firestore.collection("grupos").add(newGroup).await()

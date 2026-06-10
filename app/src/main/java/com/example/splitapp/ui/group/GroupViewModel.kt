@@ -76,11 +76,11 @@ class GroupViewModel(
 
     private var searchJob: Job? = null
 
-    fun createGroup(nombreGrupo: String, creadorId: String, descripcion: String = "") {
+    fun createGroup(nombreGrupo: String, creadorId: String, descripcion: String = "", moneda: String = "EUR") {
         viewModelScope.launch {
             _createGroupState.value = CreateGroupState.Loading
             try {
-                createGroupUseCase(nombreGrupo, creadorId, descripcion)
+                createGroupUseCase(nombreGrupo, creadorId, descripcion, moneda)
                     .onSuccess { _createGroupState.value = CreateGroupState.Success; AnalyticsHelper.logGroupCreated() }
                     .onFailure { _createGroupState.value = CreateGroupState.Error(it.message ?: "Error al crear grupo") }
             } catch (e: Exception) {

@@ -4,6 +4,11 @@ import kotlin.math.roundToLong
 
 fun Long.toEurosString(): String = "%.2f".format(this / 100.0)
 fun Long.formatEuros(): String = "${toEurosString()}€"
+fun Long.formatMoney(moneda: String): String = when (moneda) {
+    "USD" -> "\$${toEurosString()}"
+    "GBP" -> "£${toEurosString()}"
+    else  -> "${toEurosString()}€"
+}
 fun Double.toCentimos(): Long = (this * 100).roundToLong()
 
 fun distribuirJusto(totalCentimos: Long, participantes: List<String>): Map<String, Long> {

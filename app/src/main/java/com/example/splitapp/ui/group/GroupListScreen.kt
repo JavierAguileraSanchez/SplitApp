@@ -69,6 +69,7 @@ fun GroupListScreen(
     var showJoinDialog by remember { mutableStateOf(false) }
     var groupName by remember { mutableStateOf("") }
     var groupDescription by remember { mutableStateOf("") }
+    var groupMoneda by remember { mutableStateOf("EUR") }
     var profileNameInput by remember { mutableStateOf("") }
     var profileError by remember { mutableStateOf("") }
     var joinLinkInput by remember { mutableStateOf("") }
@@ -114,11 +115,16 @@ fun GroupListScreen(
             onGroupNameChange = { groupName = it },
             groupDescription = groupDescription,
             onGroupDescriptionChange = { groupDescription = it },
+            selectedMoneda = groupMoneda,
+            onMonedaChange = { groupMoneda = it },
             createGroupState = createGroupState,
             onConfirm = {
-                if (groupName.isNotBlank()) { groupViewModel.createGroup(groupName, userId, groupDescription); groupName = ""; groupDescription = "" }
+                if (groupName.isNotBlank()) {
+                    groupViewModel.createGroup(groupName, userId, groupDescription, groupMoneda)
+                    groupName = ""; groupDescription = ""; groupMoneda = "EUR"
+                }
             },
-            onDismiss = { showCreateDialog = false; groupName = ""; groupDescription = ""; groupViewModel.resetCreateGroupState() }
+            onDismiss = { showCreateDialog = false; groupName = ""; groupDescription = ""; groupMoneda = "EUR"; groupViewModel.resetCreateGroupState() }
         )
     }
 

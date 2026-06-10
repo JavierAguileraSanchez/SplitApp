@@ -32,12 +32,13 @@ import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
 import com.example.splitapp.ui.components.UserAvatar
-import com.example.splitapp.util.formatEuros
+import com.example.splitapp.util.formatMoney
 
 @Composable
 fun BalancesSection(
     group: Group,
     userNames: Map<String, String>,
+    moneda: String,
     onLiquidarDebt: () -> Unit
 ) {
     if (group.miembros.isEmpty()) {
@@ -66,7 +67,8 @@ fun BalancesSection(
                         memberId   = memberId,
                         balance    = balance,
                         isInactive = isInactive,
-                        userNames  = userNames
+                        userNames  = userNames,
+                        moneda     = moneda
                     )
                 }
             }
@@ -86,7 +88,8 @@ fun BalanceItem(
     memberId: String,
     balance: Long,
     isInactive: Boolean,
-    userNames: Map<String, String>
+    userNames: Map<String, String>,
+    moneda: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -117,8 +120,8 @@ fun BalanceItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = when {
-                        balance > 0L -> stringResource(R.string.balance_owed_to_them, balance.formatEuros())
-                        balance < 0L -> stringResource(R.string.balance_owes, (-balance).formatEuros())
+                        balance > 0L -> stringResource(R.string.balance_owed_to_them, balance.formatMoney(moneda))
+                        balance < 0L -> stringResource(R.string.balance_owes, (-balance).formatMoney(moneda))
                         else -> stringResource(R.string.balance_neutral)
                     },
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),

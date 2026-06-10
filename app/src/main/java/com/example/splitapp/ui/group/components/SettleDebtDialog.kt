@@ -18,13 +18,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
 import com.example.splitapp.domain.usecase.group.Transferencia
-import com.example.splitapp.util.formatEuros
+import com.example.splitapp.util.formatMoney
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettleDebtDialog(
     transactions: List<Transferencia>,
     userNames: Map<String, String>,
+    moneda: String,
     isLoading: Boolean,
     errorMessage: String?,
     onDismiss: () -> Unit,
@@ -53,7 +54,7 @@ fun SettleDebtDialog(
                             text = stringResource(
                                 R.string.settle_transfer,
                                 deudorName,
-                                transaction.montoCentimos.formatEuros(),
+                                transaction.montoCentimos.formatMoney(moneda),
                                 acreedorName
                             ),
                             style = MaterialTheme.typography.bodyMedium

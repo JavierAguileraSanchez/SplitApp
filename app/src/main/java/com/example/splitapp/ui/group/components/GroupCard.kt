@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
-import com.example.splitapp.util.formatEuros
+import com.example.splitapp.util.formatMoney
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -49,9 +49,9 @@ fun GroupCard(
             )
             Spacer(modifier = Modifier.height(14.dp))
             val (balanceLabel, balanceColor) = when {
-                userBalance > 10L  -> stringResource(R.string.group_card_owed_to_me, userBalance.formatEuros()) to MaterialTheme.colorScheme.primary
-                userBalance < -10L -> stringResource(R.string.group_card_i_owe, (-userBalance).formatEuros()) to MaterialTheme.colorScheme.error
-                else               -> stringResource(R.string.group_card_balance, userBalance.formatEuros()) to MaterialTheme.colorScheme.onSurfaceVariant
+                userBalance > 10L  -> stringResource(R.string.group_card_owed_to_me, userBalance.formatMoney(group.moneda)) to MaterialTheme.colorScheme.primary
+                userBalance < -10L -> stringResource(R.string.group_card_i_owe, (-userBalance).formatMoney(group.moneda)) to MaterialTheme.colorScheme.error
+                else               -> stringResource(R.string.group_card_balance, userBalance.formatMoney(group.moneda)) to MaterialTheme.colorScheme.onSurfaceVariant
             }
             Text(
                 text = balanceLabel,

@@ -117,6 +117,7 @@
     <string name="create_group_title">Crear Nuevo Grupo</string>
     <string name="create_group_name_label">Nombre del grupo</string>
     <string name="create_group_description_label">Descripción (opcional)</string>
+    <string name="create_group_currency_label">Moneda</string>
     <string name="create_group_confirm">Crear</string>
 
     <!-- Join Group Dialog -->

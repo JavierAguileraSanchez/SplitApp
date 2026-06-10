@@ -4,7 +4,7 @@ import com.example.splitapp.data.model.Group
 import kotlinx.coroutines.flow.Flow
 
 interface GroupRepository {
-    suspend fun createGroup(nombreGrupo: String, creadorId: String, descripcion: String = ""): Result<Unit>
+    suspend fun createGroup(nombreGrupo: String, creadorId: String, descripcion: String = "", moneda: String = "EUR"): Result<Unit>
     fun getGroupsForUser(userId: String): Flow<List<Group>>
     suspend fun addMemberToGroup(groupId: String, email: String): Result<Unit>
     suspend fun addMemberByUid(groupId: String, userId: String)

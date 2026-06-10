@@ -9,12 +9,11 @@ data class Group(
     @DocumentId val id: String = "",
     val nombreGrupo: String = "",
     val creadoPor: String = "",
-    // Array auxiliar para whereArrayContains en Firestore
     val miembrosActivos: List<String> = emptyList(),
-    // Fuente de verdad del estado de cada miembro (uid → isActive)
     val estadoMiembros: Map<String, Boolean> = emptyMap(),
     val balancesCentimos: Map<String, Long> = emptyMap(),
     val descripcion: String = "",
+    val moneda: String = "EUR",
     @ServerTimestamp val updatedAt: Timestamp? = null
 ) {
     @get:Exclude
