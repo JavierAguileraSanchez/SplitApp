@@ -32,6 +32,7 @@ import com.example.splitapp.ui.expense.ExpenseViewModel
 import com.example.splitapp.ui.group.GroupDetailScreen
 import com.example.splitapp.ui.group.GroupListScreen
 import com.example.splitapp.ui.group.GroupViewModel
+import com.example.splitapp.ui.group.DebtorsScreen
 import com.example.splitapp.ui.invitation.InvitationViewModel
 import com.example.splitapp.ui.invitation.InvitationsScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -129,7 +130,11 @@ fun NavGraph(
                 onNavigateToInvitations = {
                     navController.navigate(Screen.Invitations.route)
                 },
+                onNavigateToDebtors = {
+                    navController.navigate(Screen.Debtors.route)
+                },
                 onNavigateToLogin = {
+                    authViewModel.resetState()
                     FirebaseAuth.getInstance().signOut()
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -151,6 +156,25 @@ fun NavGraph(
             }
             InvitationsScreen(
                 invitationViewModel = invitationViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.Debtors.route) {
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val groupViewModel = viewModel<GroupViewModel> {
+                GroupViewModel(
+                    CreateGroupUseCase(groupRepository),
+                    GetGroupsUseCase(groupRepository),
+                    AddMemberUseCase(groupRepository),
+                    exportExpensesToCsvUseCase,
+                    SendInvitationUseCase(invitationRepository),
+                    userId = currentUserId,
+                    groupRepository = groupRepository
+                )
+            }
+            DebtorsScreen(
+                groupViewModel = groupViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

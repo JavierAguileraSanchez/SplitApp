@@ -161,6 +161,15 @@
     <string name="profile_updated">Perfil actualizado correctamente</string>
     <string name="profile_load_error">No se pudo cargar el perfil</string>
 
+    <!-- Debtors Screen -->
+    <string name="debtors_title">Quién me debe</string>
+    <string name="debtors_icon_cd">Quién me debe</string>
+    <string name="debtors_empty_title">Nadie te debe nada</string>
+    <string name="debtors_empty_hint">No tienes deudas pendientes de cobrar</string>
+    <string name="debtors_total">Total</string>
+    <string name="debtors_view_by_person">Por persona</string>
+    <string name="debtors_view_by_group">Por grupo</string>
+
     <!-- Invitations -->
     <string name="invitations_title">Invitaciones</string>
     <string name="invitations_empty">No tienes invitaciones pendientes</string>

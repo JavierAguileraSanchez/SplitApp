@@ -43,6 +43,10 @@ class AuthViewModel(
         }
     }
 
+    fun resetState() {
+        _authState.value = AuthUiState.Idle
+    }
+
     fun register(nombre: String, email: String, password: String, photoBytes: ByteArray? = null) {
         viewModelScope.launch {
             _authState.value = AuthUiState.Loading

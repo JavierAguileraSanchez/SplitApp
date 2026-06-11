@@ -52,6 +52,31 @@ class GroupViewModel(
         .catch { emit(emptyList()) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), emptyList())
 
+    val debtors: StateFlow<List<DebtorSummary>> = groups
+        .map { groupList ->
+            val debtorMap = mutableMapOf<String, MutableList<DebtorGroupEntry>>()
+            for (group in groupList) {
+                simplifyDebtsUseCase(group.balancesCentimos)
+                    .filter { it.acreedor == userId }
+                    .forEach { transfer ->
+                        debtorMap.getOrPut(transfer.deudor) { mutableListOf() }
+                            .add(DebtorGroupEntry(group.id, group.nombreGrupo, transfer.montoCentimos, group.moneda))
+                    }
+            }
+            val names = if (debtorMap.isNotEmpty())
+                groupRepository.getUserNames(debtorMap.keys.toList())
+            else
+                emptyMap()
+            debtorMap.map { (debtorId, entries) ->
+                DebtorSummary(
+                    debtorId = debtorId,
+                    nombre = names[debtorId] ?: debtorId,
+                    groupEntries = entries
+                )
+            }.sortedByDescending { it.groupEntries.sumOf { e -> e.amountCentimos } }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), emptyList())
+
     val globalBalanceState: StateFlow<GlobalBalanceState> = groups
         .map { groupList ->
             val totalQueDebo = groupList.sumOf { group ->

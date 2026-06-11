@@ -1,5 +1,18 @@
 package com.example.splitapp.ui.group
 
+data class DebtorGroupEntry(
+    val groupId: String,
+    val groupName: String,
+    val amountCentimos: Long,
+    val moneda: String
+)
+
+data class DebtorSummary(
+    val debtorId: String,
+    val nombre: String,
+    val groupEntries: List<DebtorGroupEntry>
+)
+
 data class GlobalBalanceState(
     val totalQueDebo: Long = 0L,
     val totalQueMeDeben: Long = 0L

@@ -7,48 +7,42 @@ SplitApp es una app Android (Jetpack Compose + Firebase) para dividir gastos ent
 **Stack**: Kotlin, Jetpack Compose, Firebase Auth, Firestore. Arquitectura: ViewModel + UseCases + Repository.
 
 **Funcionalidades implementadas**:
-- Registro e inicio de sesión (Firebase Auth)
+- Registro e inicio de sesión (Firebase Auth), con foto de perfil (Firebase Storage)
 - Crear grupos, añadir gastos, ver balances por miembro
 - Simplificación de deudas (algoritmo de transferencias mínimas)
 - Sistema de invitaciones: enviar, aceptar, rechazar (con bloqueo tras 2 rechazos)
 - Badge de invitaciones pendientes en la lista de grupos
 - Selector de moneda por grupo
+- Confirmación mutua para liquidar deudas (todos los acreedores deben confirmar)
 - i18n ES/EN
 
 ---
 
-## Próxima funcionalidad: confirmación mutua para liquidar deudas
+## Próxima funcionalidad: vista "Quién me debe"
 
 ### Descripción
 
-Actualmente el botón "Liquidar deudas" en `GroupDetailScreen` ejecuta la liquidación directamente. El objetivo es añadir un flujo de confirmación mutua entre los acreedores antes de que la liquidación tenga efecto.
+Una nueva pantalla accesible desde `GroupListScreen` que muestra, para el usuario actual, un resumen consolidado de **todas las personas que le deben dinero**, agrupadas por deudor.
 
 ### Comportamiento esperado
 
-- El botón **solo es pulsable** para los miembros con balance positivo (les deben dinero). Los miembros con balance negativo ven el botón desactivado.
-- Al pulsar, el usuario registra su confirmación en Firestore.
-- El botón muestra el progreso: **`X/N`** donde N = total de acreedores del grupo, X = cuántos han confirmado ya.
-- Un acreedor que ya ha confirmado puede **cancelar** su confirmación pulsando el mismo botón (que mostrará la acción de cancelar).
-- Cuando **todos** los acreedores confirman (X == N), se ejecuta la liquidación: los balances de todos los implicados se resetean a 0.
+- Lista de deudores (usuarios con balance negativo hacia el usuario actual en cualquier grupo).
+- Por cada deudor: su nombre, los grupos en los que coincide con el usuario actual y le debe dinero, y el importe que le debe en cada grupo.
+- Al final de cada deudor: el **total consolidado** que esa persona le debe sumando todos los grupos.
+- Solo se muestran deudores con saldo > 0 hacia el usuario. Si no hay nadie, mostrar estado vacío.
+- La moneda se muestra por grupo (cada grupo tiene la suya).
 
-### Datos en Firestore
+### Datos disponibles
 
-Añadir un campo al documento del grupo:
+- `groups: List<Group>` ya disponible en `GroupViewModel` — contiene `balancesCentimos: Map<userId, Long>` y `moneda`.
+- Un balance positivo de `userId` en `balancesCentimos` significa que ese usuario **le debe** al usuario actual.
+- Los nombres de usuario se obtienen con `groupRepository.getUserNames(userIds)`.
 
-```
-grupos/{groupId}:
-  liquidacionPendiente: {
-    confirmaciones: [uid1, uid2, ...]   // acreedores que han confirmado
-  }
-```
+### Archivos a crear / modificar
 
-Usar `FieldValue.arrayUnion(uid)` al confirmar y `FieldValue.arrayRemove(uid)` al cancelar.
-
-### Archivos a modificar
-
-- `Group.kt` — añadir campo `liquidacionPendiente` al modelo
-- `GroupRepositoryImpl.kt` — métodos confirm/cancel con arrayUnion/arrayRemove, y lógica de liquidación cuando X == N
-- `GroupViewModel.kt` — métodos `confirmSettlement()` / `cancelSettlement()`
-- `GroupDetailScreen.kt` — UI del botón con contador X/N y estado de cancelar
-- `GroupUiStates.kt` — añadir estado para el proceso si es necesario
-- Firestore rules — permitir update de `liquidacionPendiente` a miembros activos
+- `DebtorsScreen.kt` — nueva pantalla con la lista de deudores.
+- `GroupViewModel.kt` — añadir un StateFlow que calcule y exponga la lista de deudores a partir de `groups`.
+- `GroupUiStates.kt` — añadir el modelo de datos `DebtorSummary` (deudorId, nombre, lista de (grupo, importe, moneda), total).
+- `NavGraph.kt` + `Screen.kt` — añadir la nueva ruta.
+- `GroupListScreen.kt` — añadir acceso a la nueva pantalla (botón o icono en la TopAppBar).
+- `strings.xml` + `strings-es.xml` — textos de la nueva pantalla en EN/ES.

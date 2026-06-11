@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.foundation.BorderStroke
@@ -66,6 +67,7 @@ fun GroupListScreen(
     invitationViewModel: InvitationViewModel,
     onNavigateToGroupDetail: (String) -> Unit,
     onNavigateToInvitations: () -> Unit,
+    onNavigateToDebtors: () -> Unit,
     onNavigateToLogin: () -> Unit,
     deepLinkGroupId: String? = null,
     onLanguageChange: (String) -> Unit
@@ -221,6 +223,9 @@ fun GroupListScreen(
                         ) {
                             Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.invitations_icon_cd))
                         }
+                    }
+                    IconButton(onClick = { onNavigateToDebtors() }) {
+                        Icon(Icons.Default.People, contentDescription = stringResource(R.string.debtors_icon_cd))
                     }
                     IconButton(onClick = { showJoinDialog = true }) {
                         Icon(Icons.Default.Link, contentDescription = stringResource(R.string.groups_join_link_cd))
