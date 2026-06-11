@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.splitapp.data.model.Group
+import com.example.splitapp.data.model.User
 import com.example.splitapp.domain.repository.GroupRepository
 import com.example.splitapp.domain.usecase.expense.ExportExpensesToCsvUseCase
 import com.example.splitapp.domain.usecase.group.AddMemberUseCase
@@ -111,6 +112,9 @@ class GroupViewModel(
 
     private val _settlementState = MutableStateFlow<SettlementState>(SettlementState.Idle)
     val settlementState: StateFlow<SettlementState> = _settlementState
+
+    private val _memberProfiles = MutableStateFlow<Map<String, User>>(emptyMap())
+    val memberProfiles: StateFlow<Map<String, User>> = _memberProfiles
 
     private val _joinGroupState = MutableStateFlow<JoinGroupState>(JoinGroupState.Idle)
     val joinGroupState: StateFlow<JoinGroupState> = _joinGroupState
@@ -229,6 +233,12 @@ class GroupViewModel(
                     _joinGroupState.value = JoinGroupState.Error(msg)
                     onError(msg)
                 }
+        }
+    }
+
+    fun loadMemberProfiles(userIds: List<String>) {
+        viewModelScope.launch {
+            _memberProfiles.value = groupRepository.getMemberProfiles(userIds)
         }
     }
 

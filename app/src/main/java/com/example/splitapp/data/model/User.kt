@@ -6,7 +6,9 @@ data class User(
     @DocumentId
     val id: String = "",
     val nombre: String = "",
+    val nombreLower: String = "",
     val email: String = "",
     val role: String = "user",
-    val photoUrl: String = ""
+    val photoUrl: String = "",
+    val telefono: String = ""
 )

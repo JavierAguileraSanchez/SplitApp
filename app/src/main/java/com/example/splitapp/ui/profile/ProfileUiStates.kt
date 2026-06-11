@@ -22,3 +22,11 @@ sealed class UploadPhotoState {
     data object Success : UploadPhotoState()
     data class Error(val message: String) : UploadPhotoState()
 }
+
+sealed class UpdatePhoneState {
+    data object Idle : UpdatePhoneState()
+    data object Loading : UpdatePhoneState()
+    data object Success : UpdatePhoneState()
+    data class Error(val message: String) : UpdatePhoneState()
+}
+

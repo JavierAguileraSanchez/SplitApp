@@ -9,6 +9,12 @@
     <string name="choose_from_gallery">Elegir de la galería</string>
     <string name="take_photo">Tomar foto</string>
 
+    <!-- Validation -->
+    <string name="no_spaces_allowed">No se permiten espacios</string>
+    <string name="username_taken">Este nombre de usuario ya está en uso</string>
+    <string name="username_available">Nombre disponible</string>
+    <string name="username_checking">Comprobando…</string>
+
     <!-- Theme -->
     <string name="theme_label">Apariencia</string>
     <string name="theme_light">Claro</string>
@@ -174,6 +180,12 @@
     <string name="debtors_total">Total</string>
     <string name="debtors_view_by_person">Por persona</string>
     <string name="debtors_view_by_group">Por grupo</string>
+
+    <!-- Phone / Member detail -->
+    <string name="profile_phone_label">Teléfono (opcional)</string>
+    <string name="profile_phone_hint">ej. +34 600 123 456</string>
+    <string name="profile_phone_saved">Teléfono guardado</string>
+    <string name="member_no_phone">Sin número de teléfono</string>
 
     <!-- Invitations -->
     <string name="invitations_title">Invitaciones</string>

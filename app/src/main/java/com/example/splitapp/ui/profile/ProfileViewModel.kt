@@ -26,6 +26,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val _uploadPhotoState = MutableStateFlow<UploadPhotoState>(UploadPhotoState.Idle)
     val uploadPhotoState: StateFlow<UploadPhotoState> = _uploadPhotoState
 
+    private val _updatePhoneState = MutableStateFlow<UpdatePhoneState>(UpdatePhoneState.Idle)
+    val updatePhoneState: StateFlow<UpdatePhoneState> = _updatePhoneState
+
+    private val _phoneInput = MutableStateFlow("")
+    val phoneInput: StateFlow<String> = _phoneInput
+
     init { loadUserProfile() }
 
     fun loadUserProfile() {
@@ -33,8 +39,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             _profileState.value = ProfileState.Loading
             try {
                 val user = authRepository.getCurrentUser()
-                _profileState.value = if (user != null) ProfileState.Success(user)
-                                      else ProfileState.Error("No se pudo cargar el perfil del usuario")
+                if (user != null) {
+                    _profileState.value = ProfileState.Success(user)
+                    _phoneInput.value = user.telefono
+                } else {
+                    _profileState.value = ProfileState.Error("No se pudo cargar el perfil del usuario")
+                }
             } catch (e: Exception) {
                 _profileState.value = ProfileState.Error("Error: ${e.message}")
             }
@@ -42,7 +52,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun updateUserName(newName: String) {
-        val sanitized = newName.trim().lowercase()
+        val sanitized = newName.trim()
         when {
             sanitized.isBlank()      -> { _updateProfileState.value = UpdateProfileState.Error("El nombre no puede estar vacío"); return }
             sanitized.length > 15    -> { _updateProfileState.value = UpdateProfileState.Error("Máximo 15 caracteres permitidos"); return }
@@ -53,9 +63,17 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             try {
                 val uid = FirebaseAuth.getInstance().currentUser?.uid
                     ?: throw Exception("No hay usuario logueado")
-                authRepository.updateUserProfile(uid, sanitized)
-                    .onSuccess { _updateProfileState.value = UpdateProfileState.Success; loadUserProfile() }
-                    .onFailure { _updateProfileState.value = UpdateProfileState.Error(it.message ?: "Error desconocido") }
+                authRepository.isUsernameAvailable(sanitized, excludeUid = uid)
+                    .onSuccess { available ->
+                        if (!available) {
+                            _updateProfileState.value = UpdateProfileState.Error("Este nombre de usuario ya está en uso")
+                            return@launch
+                        }
+                        authRepository.updateUserProfile(uid, sanitized)
+                            .onSuccess { _updateProfileState.value = UpdateProfileState.Success; loadUserProfile() }
+                            .onFailure { _updateProfileState.value = UpdateProfileState.Error(it.message ?: "Error desconocido") }
+                    }
+                    .onFailure { _updateProfileState.value = UpdateProfileState.Error(it.message ?: "Error al verificar nombre") }
             } catch (e: Exception) {
                 _updateProfileState.value = UpdateProfileState.Error("Error: ${e.message}")
             }
@@ -85,6 +103,24 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun setPhoneInput(phone: String) { _phoneInput.value = phone }
+
+    fun savePhone() {
+        viewModelScope.launch {
+            _updatePhoneState.value = UpdatePhoneState.Loading
+            try {
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                    ?: throw Exception("No hay usuario logueado")
+                authRepository.updatePhone(uid, _phoneInput.value)
+                    .onSuccess { _updatePhoneState.value = UpdatePhoneState.Success }
+                    .onFailure { _updatePhoneState.value = UpdatePhoneState.Error(it.message ?: "Error desconocido") }
+            } catch (e: Exception) {
+                _updatePhoneState.value = UpdatePhoneState.Error("Error: ${e.message}")
+            }
+        }
+    }
+
     fun resetUpdateState()      { _updateProfileState.value = UpdateProfileState.Idle }
     fun resetUploadPhotoState() { _uploadPhotoState.value = UploadPhotoState.Idle }
+    fun resetUpdatePhoneState() { _updatePhoneState.value = UpdatePhoneState.Idle }
 }

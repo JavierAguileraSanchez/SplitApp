@@ -54,6 +54,7 @@ import com.example.splitapp.ui.group.components.AddMemberDialog
 import com.example.splitapp.ui.group.components.BalancesSection
 import com.example.splitapp.ui.group.components.ExpensesSection
 import com.example.splitapp.ui.group.components.GroupDescriptionAccordion
+import com.example.splitapp.ui.group.components.MemberDetailDialog
 import com.example.splitapp.ui.group.components.SplitMode
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -75,6 +76,7 @@ fun GroupDetailScreen(
     val userSearchState by groupViewModel.userSearchState.collectAsState()
     val groupActionState by groupViewModel.groupActionState.collectAsState()
     val miembrosNombres by expenseViewModel.miembrosNombres.collectAsState()
+    val memberProfiles by groupViewModel.memberProfiles.collectAsState()
 
     val group = groups.firstOrNull { it.id == groupId }
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -86,6 +88,7 @@ fun GroupDetailScreen(
     var showGroupActionDialog by remember { mutableStateOf(false) }
     var showTopBarMenu by remember { mutableStateOf(false) }
     var isDescriptionExpanded by remember { mutableStateOf(false) }
+    var selectedMemberId by remember { mutableStateOf<String?>(null) }
 
     var addTitle by remember { mutableStateOf("") }
     var addAmount by remember { mutableStateOf("") }
@@ -130,7 +133,10 @@ fun GroupDetailScreen(
         }
     }
     LaunchedEffect(group?.miembros) {
-        if (group != null) expenseViewModel.loadMiembrosNombres(group.miembros)
+        if (group != null) {
+            expenseViewModel.loadMiembrosNombres(group.miembros)
+            groupViewModel.loadMemberProfiles(group.miembros)
+        }
     }
     LaunchedEffect(addExpenseState) {
         if (addExpenseState is AddExpenseState.Success) { showAddExpenseDialog = false; expenseViewModel.resetAddExpenseState() }
@@ -269,10 +275,12 @@ fun GroupDetailScreen(
                     BalancesSection(
                         group = group,
                         userNames = miembrosNombres,
+                        memberProfiles = memberProfiles,
                         moneda = group.moneda,
                         currentUserId = currentUserId,
                         onConfirmSettlement = { groupViewModel.confirmSettlement(groupId) },
                         onCancelSettlement = { groupViewModel.cancelSettlement(groupId) },
+                        onMemberClick = { selectedMemberId = it },
                         isSettlementLoading = settlementState is SettlementState.Loading
                     )
                 } else {
@@ -357,5 +365,15 @@ fun GroupDetailScreen(
             onConfirm = { if (isCreator) groupViewModel.deleteGroup(group.id) else groupViewModel.leaveGroup(group.id) },
             onDismiss = { showGroupActionDialog = false; groupViewModel.resetGroupActionState() }
         )
+    }
+
+    selectedMemberId?.let { memberId ->
+        val profile = memberProfiles[memberId]
+        if (profile != null) {
+            MemberDetailDialog(
+                user = profile,
+                onDismiss = { selectedMemberId = null }
+            )
+        }
     }
 }

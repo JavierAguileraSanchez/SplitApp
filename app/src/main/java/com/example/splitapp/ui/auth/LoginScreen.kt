@@ -35,9 +35,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -55,6 +58,8 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var emailSpaceWarning by remember { mutableStateOf(false) }
+    var passwordSpaceWarning by remember { mutableStateOf(false) }
     val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
     val context = LocalContext.current
@@ -87,6 +92,7 @@ fun LoginScreen(
                     contentDescription = stringResource(R.string.login_logo_cd),
                     modifier = Modifier
                         .size(120.dp)
+                        .clip(RoundedCornerShape(24.dp))
                         .padding(bottom = 4.dp)
                 )
 
@@ -104,27 +110,47 @@ fun LoginScreen(
 
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = { raw ->
+                        emailSpaceWarning = raw.contains(" ")
+                        email = raw.replace(" ", "")
+                    },
                     label = { Text(stringResource(R.string.email_label)) },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true,
                     enabled = authState !is AuthUiState.Loading,
-                    isError = email.isNotBlank() && !isEmailValid,
-                    supportingText = if (email.isNotBlank() && !isEmailValid) {
-                        { Text(stringResource(R.string.login_email_error)) }
-                    } else null
+                    isError = emailSpaceWarning || (email.isNotBlank() && !isEmailValid),
+                    supportingText = when {
+                        emailSpaceWarning -> { { Text(stringResource(R.string.no_spaces_allowed)) } }
+                        email.isNotBlank() && !isEmailValid -> { { Text(stringResource(R.string.login_email_error)) } }
+                        else -> null
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { raw ->
+                        passwordSpaceWarning = raw.contains(" ")
+                        password = raw.replace(" ", "")
+                    },
                     label = { Text(stringResource(R.string.login_password_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    enabled = authState !is AuthUiState.Loading
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = true,
+                    enabled = authState !is AuthUiState.Loading,
+                    isError = passwordSpaceWarning,
+                    supportingText = if (passwordSpaceWarning) {
+                        { Text(stringResource(R.string.no_spaces_allowed)) }
+                    } else null
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

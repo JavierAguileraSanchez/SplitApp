@@ -13,6 +13,7 @@ interface GroupRepository {
     suspend fun deleteGroup(groupId: String): Result<Unit>
     suspend fun leaveGroup(groupId: String, userId: String): Result<Unit>
     suspend fun getUserNames(userIds: List<String>): Map<String, String>
+    suspend fun getMemberProfiles(userIds: List<String>): Map<String, com.example.splitapp.data.model.User>
     suspend fun confirmSettlement(groupId: String, userId: String): Result<Unit>
     suspend fun cancelSettlement(groupId: String, userId: String): Result<Unit>
 }

@@ -42,6 +42,7 @@ import androidx.core.content.FileProvider
 import com.example.splitapp.R
 import com.example.splitapp.ui.components.UserAvatar
 import com.example.splitapp.ui.profile.ProfileState
+import com.example.splitapp.ui.profile.UpdatePhoneState
 import com.example.splitapp.ui.profile.UpdateProfileState
 import com.example.splitapp.ui.profile.UploadPhotoState
 import com.example.splitapp.util.LocaleManager
@@ -54,8 +55,11 @@ fun ProfileDialog(
     profileState: ProfileState,
     updateProfileState: UpdateProfileState,
     uploadPhotoState: UploadPhotoState,
+    updatePhoneState: UpdatePhoneState,
     profileNameInput: String,
     onProfileNameChange: (String) -> Unit,
+    phoneInput: String,
+    onPhoneChange: (String) -> Unit,
     onSave: () -> Unit,
     onUploadPhoto: (Uri) -> Unit,
     onResetUploadPhoto: () -> Unit,
@@ -200,6 +204,34 @@ fun ProfileDialog(
                                 )
                             }
                         )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(text = stringResource(R.string.profile_phone_label), style = MaterialTheme.typography.labelMedium)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedTextField(
+                            value = phoneInput,
+                            onValueChange = onPhoneChange,
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.profile_phone_hint), style = MaterialTheme.typography.bodySmall) },
+                            singleLine = true,
+                            enabled = updatePhoneState !is UpdatePhoneState.Loading
+                        )
+                        if (updatePhoneState is UpdatePhoneState.Success) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.profile_phone_saved),
+                                color = MaterialTheme.colorScheme.secondary,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        if (updatePhoneState is UpdatePhoneState.Error) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = updatePhoneState.message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(text = stringResource(R.string.language), style = MaterialTheme.typography.labelMedium)

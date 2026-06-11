@@ -7,9 +7,18 @@ import com.example.splitapp.data.repository.AuthRepositoryImpl
 import com.example.splitapp.domain.repository.AuthRepository
 import com.example.splitapp.domain.usecase.auth.LoginUseCase
 import com.example.splitapp.domain.usecase.auth.RegisterUseCase
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+
+sealed class UsernameAvailability {
+    data object Idle : UsernameAvailability()
+    data object Checking : UsernameAvailability()
+    data object Available : UsernameAvailability()
+    data object Taken : UsernameAvailability()
+}
 
 sealed class AuthUiState {
     data object Idle : AuthUiState()
@@ -27,6 +36,11 @@ class AuthViewModel(
     private val _authState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val authState: StateFlow<AuthUiState> = _authState
 
+    private val _usernameAvailability = MutableStateFlow<UsernameAvailability>(UsernameAvailability.Idle)
+    val usernameAvailability: StateFlow<UsernameAvailability> = _usernameAvailability
+
+    private var usernameCheckJob: Job? = null
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthUiState.Loading
@@ -42,6 +56,23 @@ class AuthViewModel(
             }
         }
     }
+
+    fun checkUsernameAvailability(nombre: String) {
+        usernameCheckJob?.cancel()
+        if (nombre.isBlank()) { _usernameAvailability.value = UsernameAvailability.Idle; return }
+        _usernameAvailability.value = UsernameAvailability.Checking
+        usernameCheckJob = viewModelScope.launch {
+            delay(500L)
+            authRepository.isUsernameAvailable(nombre)
+                .onSuccess { available ->
+                    _usernameAvailability.value =
+                        if (available) UsernameAvailability.Available else UsernameAvailability.Taken
+                }
+                .onFailure { _usernameAvailability.value = UsernameAvailability.Idle }
+        }
+    }
+
+    fun resetUsernameAvailability() { _usernameAvailability.value = UsernameAvailability.Idle }
 
     fun resetState() {
         _authState.value = AuthUiState.Idle

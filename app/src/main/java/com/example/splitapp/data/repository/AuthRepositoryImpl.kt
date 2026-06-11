@@ -36,9 +36,11 @@ class AuthRepositoryImpl : FirestoreRepository(), AuthRepository {
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, pass).await()
             val uid = authResult.user?.uid ?: throw Exception("UID no disponible")
 
+            val trimmed = nombre.trim()
             val newUser = User(
                 id = uid,
-                nombre = nombre.lowercase().trim(),
+                nombre = trimmed,
+                nombreLower = trimmed.lowercase(),
                 email = email,
                 role = "user"
             )
@@ -73,9 +75,10 @@ class AuthRepositoryImpl : FirestoreRepository(), AuthRepository {
 
     override suspend fun updateUserProfile(uid: String, nombre: String): Result<Unit> {
         return try {
+            val trimmed = nombre.trim()
             withContext(Dispatchers.IO) {
                 firestore.collection("usuarios").document(uid).update(
-                    mapOf("nombre" to nombre.lowercase().trim())
+                    mapOf("nombre" to trimmed, "nombreLower" to trimmed.lowercase())
                 ).await()
             }
             Result.success(Unit)
@@ -83,6 +86,20 @@ class AuthRepositoryImpl : FirestoreRepository(), AuthRepository {
             Result.failure(Exception("Error al actualizar perfil: ${e.message}"))
         }
     }
+
+    override suspend fun isUsernameAvailable(nombre: String, excludeUid: String): Result<Boolean> =
+        runCatching {
+            val lowerName = nombre.lowercase().trim()
+            // Query by nombreLower (new users) and by nombre directly (old users stored as lowercase)
+            val byLower = firestore.collection("usuarios")
+                .whereEqualTo("nombreLower", lowerName).get().await()
+            val byNombre = firestore.collection("usuarios")
+                .whereEqualTo("nombre", lowerName).get().await()
+            val conflicts = (byLower.documents + byNombre.documents)
+                .distinctBy { it.id }
+                .filter { it.id != excludeUid }
+            conflicts.isEmpty()
+        }
 
     override suspend fun uploadProfilePhoto(uid: String, imageBytes: ByteArray): Result<String> {
         return try {
@@ -109,4 +126,17 @@ class AuthRepositoryImpl : FirestoreRepository(), AuthRepository {
             Result.failure(Exception("Error al actualizar foto: ${e.message}"))
         }
     }
+
+    override suspend fun updatePhone(uid: String, phone: String): Result<Unit> {
+        return try {
+            withContext(Dispatchers.IO) {
+                firestore.collection("usuarios").document(uid)
+                    .update("telefono", phone.trim()).await()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(Exception("Error al guardar teléfono: ${e.message}"))
+        }
+    }
+
 }

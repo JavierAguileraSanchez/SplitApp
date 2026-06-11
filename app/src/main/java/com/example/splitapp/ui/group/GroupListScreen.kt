@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -82,6 +83,7 @@ fun GroupListScreen(
     var groupMoneda by remember { mutableStateOf("EUR") }
     var profileNameInput by remember { mutableStateOf("") }
     var profileError by remember { mutableStateOf("") }
+    var phoneInput by remember { mutableStateOf("") }
     var joinLinkInput by remember { mutableStateOf("") }
     var joinError by remember { mutableStateOf("") }
     var groupForAction by remember { mutableStateOf<Group?>(null) }
@@ -90,6 +92,8 @@ fun GroupListScreen(
     val profileState by profileViewModel.profileState.collectAsState()
     val updateProfileState by profileViewModel.updateProfileState.collectAsState()
     val uploadPhotoState by profileViewModel.uploadPhotoState.collectAsState()
+    val updatePhoneState by profileViewModel.updatePhoneState.collectAsState()
+    val phoneFromVm by profileViewModel.phoneInput.collectAsState()
 
     val groups by groupViewModel.groups.collectAsState()
     val globalBalanceState by groupViewModel.globalBalanceState.collectAsState()
@@ -105,9 +109,12 @@ fun GroupListScreen(
         if (!deepLinkGroupId.isNullOrBlank()) { joinLinkInput = deepLinkGroupId; showJoinDialog = true }
     }
     LaunchedEffect(profileState) {
-        if (profileState is com.example.splitapp.ui.profile.ProfileState.Success)
-            profileNameInput = (profileState as com.example.splitapp.ui.profile.ProfileState.Success).user.nombre
+        if (profileState is com.example.splitapp.ui.profile.ProfileState.Success) {
+            val u = (profileState as com.example.splitapp.ui.profile.ProfileState.Success).user
+            profileNameInput = u.nombre
+        }
     }
+    LaunchedEffect(phoneFromVm) { phoneInput = phoneFromVm }
     LaunchedEffect(groupActionState) {
         if (groupActionState is GroupActionState.Success) { groupForAction = null; groupViewModel.resetGroupActionState() }
     }
@@ -162,21 +169,27 @@ fun GroupListScreen(
             profileState = profileState,
             updateProfileState = updateProfileState,
             uploadPhotoState = uploadPhotoState,
+            updatePhoneState = updatePhoneState,
             profileNameInput = profileNameInput,
             onProfileNameChange = { newValue ->
-                val sanitized = newValue.replace(" ", "").lowercase()
+                val sanitized = newValue.replace(" ", "")
                 if (sanitized.length <= 15) profileNameInput = sanitized
             },
+            phoneInput = phoneInput,
+            onPhoneChange = { phoneInput = it; profileViewModel.setPhoneInput(it) },
             onSave = {
-                if (profileNameInput.isNotBlank()) { profileError = ""; profileViewModel.updateUserName(profileNameInput) }
-                else profileError = "El nombre no puede estar vacío"
+                if (profileNameInput.isNotBlank()) {
+                    profileError = ""
+                    profileViewModel.updateUserName(profileNameInput)
+                    profileViewModel.savePhone()
+                } else profileError = "El nombre no puede estar vacío"
             },
             onUploadPhoto = { uri ->
                 val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@ProfileDialog
                 profileViewModel.uploadAndUpdatePhoto(uid, uri)
             },
             onResetUploadPhoto = profileViewModel::resetUploadPhotoState,
-            onDismiss = { showProfileDialog = false },
+            onDismiss = { showProfileDialog = false; profileViewModel.resetUpdatePhoneState() },
             onLogout = { showProfileDialog = false; onNavigateToLogin() },
             isDarkTheme = isDarkTheme,
             onThemeChange = onThemeChange,
@@ -209,6 +222,7 @@ fun GroupListScreen(
                         modifier = Modifier
                             .padding(start = 12.dp)
                             .size(32.dp)
+                            .clip(RoundedCornerShape(6.dp))
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

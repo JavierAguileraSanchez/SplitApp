@@ -9,4 +9,6 @@ interface AuthRepository {
     suspend fun updateUserProfile(uid: String, nombre: String): Result<Unit>
     suspend fun uploadProfilePhoto(uid: String, imageBytes: ByteArray): Result<String>
     suspend fun updateProfilePhoto(uid: String, photoUrl: String): Result<Unit>
+    suspend fun isUsernameAvailable(nombre: String, excludeUid: String = ""): Result<Boolean>
+    suspend fun updatePhone(uid: String, phone: String): Result<Unit>
 }

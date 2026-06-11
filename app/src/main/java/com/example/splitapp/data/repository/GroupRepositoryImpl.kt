@@ -142,6 +142,18 @@ class GroupRepositoryImpl : FirestoreRepository(), GroupRepository {
         return result
     }
 
+    override suspend fun getMemberProfiles(userIds: List<String>): Map<String, User> {
+        val result = mutableMapOf<String, User>()
+        for (id in userIds) {
+            try {
+                val doc = firestore.collection("usuarios").document(id).get().await()
+                val user = doc.toObject(User::class.java)
+                if (user != null) result[id] = user
+            } catch (_: Exception) { }
+        }
+        return result
+    }
+
     override suspend fun confirmSettlement(groupId: String, userId: String): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
             val groupRef = firestore.collection("grupos").document(groupId)

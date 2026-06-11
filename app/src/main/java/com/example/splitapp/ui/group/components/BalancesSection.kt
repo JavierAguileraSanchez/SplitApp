@@ -1,6 +1,7 @@
 package com.example.splitapp.ui.group.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
 import com.example.splitapp.data.model.Group
+import com.example.splitapp.data.model.User
 import com.example.splitapp.ui.components.UserAvatar
 import com.example.splitapp.util.formatMoney
 
@@ -39,10 +41,12 @@ import com.example.splitapp.util.formatMoney
 fun BalancesSection(
     group: Group,
     userNames: Map<String, String>,
+    memberProfiles: Map<String, User>,
     moneda: String,
     currentUserId: String,
     onConfirmSettlement: () -> Unit,
     onCancelSettlement: () -> Unit,
+    onMemberClick: (userId: String) -> Unit,
     isSettlementLoading: Boolean
 ) {
     if (group.miembros.isEmpty()) {
@@ -74,12 +78,15 @@ fun BalancesSection(
                 items(group.miembros) { memberId ->
                     val balance = group.balancesCentimos[memberId] ?: 0L
                     val isInactive = group.estadoMiembros[memberId] == false
+                    val profile = memberProfiles[memberId]
                     BalanceItem(
                         memberId   = memberId,
                         balance    = balance,
                         isInactive = isInactive,
                         userNames  = userNames,
-                        moneda     = moneda
+                        photoUrl   = profile?.photoUrl?.takeIf { it.isNotBlank() },
+                        moneda     = moneda,
+                        onClick    = { onMemberClick(memberId) }
                     )
                 }
             }
@@ -111,10 +118,14 @@ fun BalanceItem(
     balance: Long,
     isInactive: Boolean,
     userNames: Map<String, String>,
-    moneda: String
+    photoUrl: String?,
+    moneda: String,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -125,7 +136,7 @@ fun BalanceItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val displayName = userNames[memberId] ?: memberId
-            UserAvatar(name = displayName, size = 44.dp)
+            UserAvatar(name = displayName, photoUrl = photoUrl, size = 44.dp)
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
