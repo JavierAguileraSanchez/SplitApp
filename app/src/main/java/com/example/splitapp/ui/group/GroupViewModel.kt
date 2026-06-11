@@ -1,5 +1,6 @@
 package com.example.splitapp.ui.group
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.splitapp.data.model.Group
@@ -10,8 +11,10 @@ import com.example.splitapp.domain.usecase.group.CreateGroupUseCase
 import com.example.splitapp.domain.usecase.group.GetGroupsUseCase
 import com.example.splitapp.domain.usecase.group.SimplifyDebtsUseCase
 import com.example.splitapp.domain.usecase.group.Transferencia
+import com.example.splitapp.domain.usecase.invitation.SendInvitationUseCase
 import com.example.splitapp.util.AnalyticsHelper
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,12 +31,22 @@ class GroupViewModel(
     private val getGroupsUseCase: GetGroupsUseCase,
     private val addMemberUseCase: AddMemberUseCase,
     private val exportExpensesToCsvUseCase: ExportExpensesToCsvUseCase,
+    private val sendInvitationUseCase: SendInvitationUseCase,
     userId: String,
     private val groupRepository: GroupRepository
 ) : ViewModel() {
 
     private val simplifyDebtsUseCase = SimplifyDebtsUseCase()
     val currentUserId: String = userId
+
+    private val _currentUserName = MutableStateFlow("")
+
+    init {
+        viewModelScope.launch {
+            val names = groupRepository.getUserNames(listOf(userId))
+            _currentUserName.value = names[userId] ?: ""
+        }
+    }
 
     val groups: StateFlow<List<Group>> = getGroupsUseCase(userId)
         .catch { emit(emptyList()) }
@@ -80,10 +93,19 @@ class GroupViewModel(
         viewModelScope.launch {
             _createGroupState.value = CreateGroupState.Loading
             try {
-                createGroupUseCase(nombreGrupo, creadorId, descripcion, moneda)
-                    .onSuccess { _createGroupState.value = CreateGroupState.Success; AnalyticsHelper.logGroupCreated() }
-                    .onFailure { _createGroupState.value = CreateGroupState.Error(it.message ?: "Error al crear grupo") }
+                withTimeout(15_000L) {
+                    createGroupUseCase(nombreGrupo, creadorId, descripcion, moneda)
+                        .onSuccess {
+                            _createGroupState.value = CreateGroupState.Success
+                            AnalyticsHelper.logGroupCreated()
+                        }
+                        .onFailure { e ->
+                            Log.e("SplitApp/Groups", "createGroup failure: ${e.message}", e)
+                            _createGroupState.value = CreateGroupState.Error(e.message ?: "Error al crear grupo")
+                        }
+                }
             } catch (e: Exception) {
+                Log.e("SplitApp/Groups", "createGroup exception: ${e.message}", e)
                 _createGroupState.value = CreateGroupState.Error("Error al crear grupo: ${e.message}")
             }
         }
@@ -102,15 +124,25 @@ class GroupViewModel(
         }
     }
 
-    fun addMemberById(groupId: String, userId: String) {
+    fun sendInvitation(groupId: String, grupoNombre: String, paraUserId: String) {
         viewModelScope.launch {
             _addMemberState.value = AddMemberState.Loading
-            try {
-                groupRepository.addMemberByUid(groupId, userId)
-                _addMemberState.value = AddMemberState.Success
-            } catch (e: Exception) {
-                _addMemberState.value = AddMemberState.Error(e.message ?: "Error al agregar miembro")
-            }
+            sendInvitationUseCase(
+                grupoId = groupId,
+                grupoNombre = grupoNombre,
+                invitadoPorId = currentUserId,
+                invitadoPorNombre = _currentUserName.value,
+                paraUserId = paraUserId
+            )
+                .onSuccess { _addMemberState.value = AddMemberState.Success }
+                .onFailure { e ->
+                    _addMemberState.value = when (e.message) {
+                        "BLOCKED" -> AddMemberState.InvitationBlocked
+                        "ALREADY_PENDING" -> AddMemberState.InvitationAlreadyPending
+                        "ALREADY_MEMBER" -> AddMemberState.InvitationAlreadyMember
+                        else -> AddMemberState.Error(e.message ?: "Error al enviar invitación")
+                    }
+                }
         }
     }
 

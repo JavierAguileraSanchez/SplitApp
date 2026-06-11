@@ -108,6 +108,7 @@ fun GroupDetailScreen(
     // Pre-resolved strings for use inside LaunchedEffect / lambdas
     val linkCopiedMsg = stringResource(R.string.group_link_copied)
     val invLinkLabel = stringResource(R.string.group_invitation_link_label)
+    val invitationSentMsg = stringResource(R.string.invitation_sent)
     val exportSuccessTemplate = stringResource(R.string.group_export_success)
     val invalidAmountMsg = stringResource(R.string.add_expense_invalid_amount)
     val noParticipantsMsg = stringResource(R.string.add_expense_no_participants)
@@ -142,6 +143,7 @@ fun GroupDetailScreen(
     LaunchedEffect(addMemberState) {
         if (addMemberState is AddMemberState.Success) {
             showAddMemberDialog = false
+            scope.launch { snackbarHostState.showSnackbar(invitationSentMsg) }
             groupViewModel.resetAddMemberState(); groupViewModel.resetSearchState()
         }
     }
@@ -348,7 +350,7 @@ fun GroupDetailScreen(
             userSearchState = userSearchState,
             addMemberState = addMemberState,
             onSearchUsers = groupViewModel::searchUsers,
-            onAddMember = { userId -> groupViewModel.addMemberById(groupId, userId) },
+            onAddMember = { userId -> groupViewModel.sendInvitation(groupId, group.nombreGrupo, userId) },
             onResetSearch = groupViewModel::resetSearchState,
             onResetAddMember = groupViewModel::resetAddMemberState,
             onDismiss = { showAddMemberDialog = false }

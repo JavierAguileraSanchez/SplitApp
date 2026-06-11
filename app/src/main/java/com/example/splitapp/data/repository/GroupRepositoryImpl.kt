@@ -1,5 +1,6 @@
 package com.example.splitapp.data.repository
 
+import android.util.Log
 import com.example.splitapp.data.model.Group
 import com.example.splitapp.data.model.User
 import com.example.splitapp.domain.repository.GroupRepository
@@ -19,17 +20,18 @@ class GroupRepositoryImpl : FirestoreRepository(), GroupRepository {
         descripcion: String,
         moneda: String
     ): Result<Unit> = runCatching {
-        val newGroup = Group(
-            nombreGrupo = nombreGrupo,
-            creadoPor = creadorId,
-            miembrosActivos = listOf(creadorId),
-            estadoMiembros = mapOf(creadorId to true),
-            balancesCentimos = mapOf(creadorId to 0L),
-            descripcion = descripcion,
-            moneda = moneda
+        val data = hashMapOf(
+            "nombreGrupo" to nombreGrupo,
+            "creadoPor" to creadorId,
+            "miembrosActivos" to listOf(creadorId),
+            "estadoMiembros" to hashMapOf(creadorId to true),
+            "balancesCentimos" to hashMapOf(creadorId to 0L),
+            "descripcion" to descripcion,
+            "moneda" to moneda,
+            "updatedAt" to FieldValue.serverTimestamp()
         )
         withContext(Dispatchers.IO) {
-            firestore.collection("grupos").add(newGroup).await()
+            firestore.collection("grupos").add(data).await()
         }
     }
 
@@ -40,8 +42,19 @@ class GroupRepositoryImpl : FirestoreRepository(), GroupRepository {
         val listener = firestore.collection("grupos")
             .whereArrayContains("miembrosActivos", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
-                if (snapshot != null) trySend(snapshot.toObjects(Group::class.java))
+                if (error != null) {
+                    Log.e("SplitApp/Groups", "getGroupsForUser failed: ${error.code} ${error.message}")
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    try {
+                        trySend(snapshot.toObjects(Group::class.java))
+                    } catch (e: Exception) {
+                        Log.e("SplitApp/Groups", "toObjects failed: ${e.message}", e)
+                        trySend(emptyList())
+                    }
+                }
             }
         awaitClose { listener.remove() }
     }

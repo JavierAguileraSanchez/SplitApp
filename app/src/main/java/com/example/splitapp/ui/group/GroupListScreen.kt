@@ -19,6 +19,9 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,6 +54,7 @@ import com.example.splitapp.ui.group.components.CreateGroupDialog
 import com.example.splitapp.ui.group.components.GroupCard
 import com.example.splitapp.ui.group.components.JoinGroupDialog
 import com.example.splitapp.ui.group.components.ProfileDialog
+import com.example.splitapp.ui.invitation.InvitationViewModel
 import com.example.splitapp.ui.profile.ProfileViewModel
 import com.example.splitapp.util.formatEuros
 import com.google.firebase.auth.FirebaseAuth
@@ -59,7 +63,9 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun GroupListScreen(
     groupViewModel: GroupViewModel,
+    invitationViewModel: InvitationViewModel,
     onNavigateToGroupDetail: (String) -> Unit,
+    onNavigateToInvitations: () -> Unit,
     onNavigateToLogin: () -> Unit,
     deepLinkGroupId: String? = null,
     onLanguageChange: (String) -> Unit
@@ -83,6 +89,7 @@ fun GroupListScreen(
 
     val groups by groupViewModel.groups.collectAsState()
     val globalBalanceState by groupViewModel.globalBalanceState.collectAsState()
+    val pendingInvitationsCount by invitationViewModel.pendingCount.collectAsState()
     val createGroupState by groupViewModel.createGroupState.collectAsState()
     val groupActionState by groupViewModel.groupActionState.collectAsState()
     val joinGroupState by groupViewModel.joinGroupState.collectAsState()
@@ -204,6 +211,17 @@ fun GroupListScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 actions = {
+                    IconButton(onClick = { onNavigateToInvitations() }) {
+                        BadgedBox(
+                            badge = {
+                                if (pendingInvitationsCount > 0) {
+                                    Badge { Text("$pendingInvitationsCount") }
+                                }
+                            }
+                        ) {
+                            Icon(Icons.Default.Notifications, contentDescription = stringResource(R.string.invitations_icon_cd))
+                        }
+                    }
                     IconButton(onClick = { showJoinDialog = true }) {
                         Icon(Icons.Default.Link, contentDescription = stringResource(R.string.groups_join_link_cd))
                     }

@@ -157,4 +157,17 @@
     <string name="profile_logout">Cerrar Sesión</string>
     <string name="profile_updated">Perfil actualizado correctamente</string>
     <string name="profile_load_error">No se pudo cargar el perfil</string>
+
+    <!-- Invitations -->
+    <string name="invitations_title">Invitaciones</string>
+    <string name="invitations_empty">No tienes invitaciones pendientes</string>
+    <string name="invitation_from">Invitado por %1$s</string>
+    <string name="invitation_group">Grupo: %1$s</string>
+    <string name="invitation_accept">Aceptar</string>
+    <string name="invitation_reject">Rechazar</string>
+    <string name="invitation_sent">Invitación enviada</string>
+    <string name="invitation_blocked">Este usuario ha rechazado unirse a este grupo dos veces</string>
+    <string name="invitation_already_pending">Ya existe una invitación pendiente para este usuario</string>
+    <string name="invitation_already_member">Este usuario ya es miembro del grupo</string>
+    <string name="invitations_icon_cd">Invitaciones</string>
 </resources>

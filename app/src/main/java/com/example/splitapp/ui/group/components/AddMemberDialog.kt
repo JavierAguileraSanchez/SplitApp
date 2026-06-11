@@ -125,12 +125,16 @@ fun AddMemberDialog(
                     }
                 }
 
-                if (addMemberState is AddMemberState.Error) {
+                val errorText = when (addMemberState) {
+                    is AddMemberState.Error -> addMemberState.message
+                    is AddMemberState.InvitationBlocked -> stringResource(R.string.invitation_blocked)
+                    is AddMemberState.InvitationAlreadyPending -> stringResource(R.string.invitation_already_pending)
+                    is AddMemberState.InvitationAlreadyMember -> stringResource(R.string.invitation_already_member)
+                    else -> null
+                }
+                if (errorText != null) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = addMemberState.message,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Text(text = errorText, color = MaterialTheme.colorScheme.error)
                 }
                 if (addMemberState is AddMemberState.Loading) {
                     Spacer(modifier = Modifier.height(12.dp))
@@ -141,7 +145,7 @@ fun AddMemberDialog(
         confirmButton = {
             Button(
                 onClick = { if (selectedUserId.isNotBlank()) onAddMember(selectedUserId) },
-                enabled = selectedUserId.isNotBlank() && addMemberState !is AddMemberState.Loading
+                enabled = selectedUserId.isNotBlank() && addMemberState !is AddMemberState.Loading && addMemberState !is AddMemberState.Success
             ) {
                 Text(stringResource(R.string.confirm))
             }

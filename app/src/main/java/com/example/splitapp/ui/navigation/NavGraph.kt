@@ -10,11 +10,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.splitapp.data.repository.ExpenseRepositoryImpl
+import com.example.splitapp.domain.repository.GroupRepository
+import com.example.splitapp.domain.repository.InvitationRepository
 import com.example.splitapp.domain.usecase.expense.AddExpenseUseCase
 import com.example.splitapp.domain.usecase.expense.DeleteExpenseUseCase
+import com.example.splitapp.domain.usecase.expense.ExportExpensesToCsvUseCase
 import com.example.splitapp.domain.usecase.expense.GetExpensesUseCase
 import com.example.splitapp.domain.usecase.expense.SettleDebtUseCase
+import com.example.splitapp.domain.usecase.group.AddMemberUseCase
+import com.example.splitapp.domain.usecase.group.CreateGroupUseCase
+import com.example.splitapp.domain.usecase.group.GetGroupsUseCase
 import com.example.splitapp.domain.usecase.group.GetUserNamesUseCase
+import com.example.splitapp.domain.usecase.invitation.AcceptInvitationUseCase
+import com.example.splitapp.domain.usecase.invitation.GetInvitationsUseCase
+import com.example.splitapp.domain.usecase.invitation.RejectInvitationUseCase
+import com.example.splitapp.domain.usecase.invitation.SendInvitationUseCase
 import com.example.splitapp.ui.auth.AuthViewModel
 import com.example.splitapp.ui.auth.LoginScreen
 import com.example.splitapp.ui.auth.RegisterScreen
@@ -22,13 +32,17 @@ import com.example.splitapp.ui.expense.ExpenseViewModel
 import com.example.splitapp.ui.group.GroupDetailScreen
 import com.example.splitapp.ui.group.GroupListScreen
 import com.example.splitapp.ui.group.GroupViewModel
+import com.example.splitapp.ui.invitation.InvitationViewModel
+import com.example.splitapp.ui.invitation.InvitationsScreen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    groupViewModel: GroupViewModel,
+    groupRepository: GroupRepository,
+    invitationRepository: InvitationRepository,
+    exportExpensesToCsvUseCase: ExportExpensesToCsvUseCase,
     getUserNamesUseCase: GetUserNamesUseCase,
     onLanguageChange: (String) -> Unit
 ) {
@@ -85,11 +99,35 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val deepLinkGroupId = backStackEntry.arguments?.getString("groupId")
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val groupViewModel = viewModel<GroupViewModel> {
+                GroupViewModel(
+                    CreateGroupUseCase(groupRepository),
+                    GetGroupsUseCase(groupRepository),
+                    AddMemberUseCase(groupRepository),
+                    exportExpensesToCsvUseCase,
+                    SendInvitationUseCase(invitationRepository),
+                    userId = currentUserId,
+                    groupRepository = groupRepository
+                )
+            }
+            val invitationViewModel = viewModel<InvitationViewModel> {
+                InvitationViewModel(
+                    getInvitationsUseCase = GetInvitationsUseCase(invitationRepository),
+                    acceptInvitationUseCase = AcceptInvitationUseCase(invitationRepository),
+                    rejectInvitationUseCase = RejectInvitationUseCase(invitationRepository),
+                    userId = currentUserId
+                )
+            }
             GroupListScreen(
                 groupViewModel = groupViewModel,
+                invitationViewModel = invitationViewModel,
                 deepLinkGroupId = deepLinkGroupId,
                 onNavigateToGroupDetail = { groupId ->
                     navController.navigate(Screen.GroupDetail(groupId).createRoute())
+                },
+                onNavigateToInvitations = {
+                    navController.navigate(Screen.Invitations.route)
                 },
                 onNavigateToLogin = {
                     FirebaseAuth.getInstance().signOut()
@@ -98,6 +136,22 @@ fun NavGraph(
                     }
                 },
                 onLanguageChange = onLanguageChange
+            )
+        }
+
+        composable(route = Screen.Invitations.route) {
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val invitationViewModel = viewModel<InvitationViewModel> {
+                InvitationViewModel(
+                    getInvitationsUseCase = GetInvitationsUseCase(invitationRepository),
+                    acceptInvitationUseCase = AcceptInvitationUseCase(invitationRepository),
+                    rejectInvitationUseCase = RejectInvitationUseCase(invitationRepository),
+                    userId = currentUserId
+                )
+            }
+            InvitationsScreen(
+                invitationViewModel = invitationViewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -121,7 +175,18 @@ fun NavGraph(
                     groupId              = groupId
                 )
             }
-
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val groupViewModel = viewModel<GroupViewModel> {
+                GroupViewModel(
+                    CreateGroupUseCase(groupRepository),
+                    GetGroupsUseCase(groupRepository),
+                    AddMemberUseCase(groupRepository),
+                    exportExpensesToCsvUseCase,
+                    SendInvitationUseCase(invitationRepository),
+                    userId = currentUserId,
+                    groupRepository = groupRepository
+                )
+            }
             GroupDetailScreen(
                 groupId = groupId,
                 expenseViewModel = expenseViewModel,

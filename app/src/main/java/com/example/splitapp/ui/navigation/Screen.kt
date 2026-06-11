@@ -8,4 +8,5 @@ sealed class Screen(val route: String) {
         fun createRoute() = "groupDetail/$groupId"
         companion object { const val ROUTE = "groupDetail/{groupId}" }
     }
+    data object Invitations : Screen("invitations")
 }

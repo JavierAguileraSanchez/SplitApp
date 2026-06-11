@@ -19,6 +19,9 @@ sealed class AddMemberState {
     data object Loading : AddMemberState()
     data object Success : AddMemberState()
     data class Error(val message: String) : AddMemberState()
+    data object InvitationBlocked : AddMemberState()
+    data object InvitationAlreadyPending : AddMemberState()
+    data object InvitationAlreadyMember : AddMemberState()
 }
 
 sealed class GroupActionState {
