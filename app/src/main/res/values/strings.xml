@@ -85,6 +85,9 @@
     <string name="balances_no_members">No registered members</string>
     <string name="balances_current">Current balances</string>
     <string name="balances_settle_debt">Settle debt</string>
+    <string name="settle_confirm_progress">Confirm settlement (%1$d/%2$d)</string>
+    <string name="settle_cancel_confirmation">Cancel confirmation (%1$d/%2$d)</string>
+    <string name="settle_awaiting">Awaiting settlement (%1$d/%2$d)</string>
     <string name="balance_owed_to_them">Owed to them: %1$s</string>
     <string name="balance_owes">Owes: %1$s</string>
     <string name="balance_neutral">Neutral balance</string>

@@ -46,20 +46,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
-import com.example.splitapp.domain.usecase.group.Transferencia
 import com.example.splitapp.ui.expense.AddExpenseState
 import com.example.splitapp.ui.expense.ExpensesUiState
 import com.example.splitapp.ui.expense.ExpenseViewModel
-import com.example.splitapp.ui.expense.SettleDebtState
 import com.example.splitapp.ui.group.components.AddExpenseDialog
 import com.example.splitapp.ui.group.components.AddMemberDialog
 import com.example.splitapp.ui.group.components.BalancesSection
 import com.example.splitapp.ui.group.components.ExpensesSection
 import com.example.splitapp.ui.group.components.GroupDescriptionAccordion
-import com.example.splitapp.ui.group.components.SettleDebtDialog
 import com.example.splitapp.ui.group.components.SplitMode
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -74,7 +70,7 @@ fun GroupDetailScreen(
     val groups by groupViewModel.groups.collectAsState()
     val expensesState by expenseViewModel.expensesState.collectAsState()
     val addExpenseState by expenseViewModel.addExpenseState.collectAsState()
-    val settleDebtState by expenseViewModel.settleDebtState.collectAsState()
+    val settlementState by groupViewModel.settlementState.collectAsState()
     val addMemberState by groupViewModel.addMemberState.collectAsState()
     val userSearchState by groupViewModel.userSearchState.collectAsState()
     val groupActionState by groupViewModel.groupActionState.collectAsState()
@@ -86,12 +82,10 @@ fun GroupDetailScreen(
 
     var selectedTab by remember { mutableStateOf(0) }
     var showAddExpenseDialog by remember { mutableStateOf(false) }
-    var showSettleDebtDialog by remember { mutableStateOf(false) }
     var showAddMemberDialog by remember { mutableStateOf(false) }
     var showGroupActionDialog by remember { mutableStateOf(false) }
     var showTopBarMenu by remember { mutableStateOf(false) }
     var isDescriptionExpanded by remember { mutableStateOf(false) }
-    var optimizedTransactions by remember { mutableStateOf<List<Transferencia>>(emptyList()) }
 
     var addTitle by remember { mutableStateOf("") }
     var addAmount by remember { mutableStateOf("") }
@@ -119,6 +113,14 @@ fun GroupDetailScreen(
     val groupLoadingMsg = stringResource(R.string.group_loading)
     val groupNotFoundMsg = stringResource(R.string.group_not_found)
 
+    LaunchedEffect(settlementState) {
+        if (settlementState is SettlementState.Success) groupViewModel.resetSettlementState()
+        if (settlementState is SettlementState.Error) {
+            scope.launch { snackbarHostState.showSnackbar((settlementState as SettlementState.Error).message) }
+            groupViewModel.resetSettlementState()
+        }
+    }
+
     LaunchedEffect(showAddExpenseDialog, group?.miembrosActivos) {
         if (showAddExpenseDialog) {
             selectedParticipants.clear(); customSplitValues.clear()
@@ -127,18 +129,11 @@ fun GroupDetailScreen(
             addTitle = ""; addAmount = ""; selectedPagadorId = currentUserId
         }
     }
-    LaunchedEffect(showSettleDebtDialog, group?.balancesCentimos) {
-        if (showSettleDebtDialog && group != null)
-            optimizedTransactions = expenseViewModel.calcularLiquidacionOptima(group.balancesCentimos)
-    }
     LaunchedEffect(group?.miembros) {
         if (group != null) expenseViewModel.loadMiembrosNombres(group.miembros)
     }
     LaunchedEffect(addExpenseState) {
         if (addExpenseState is AddExpenseState.Success) { showAddExpenseDialog = false; expenseViewModel.resetAddExpenseState() }
-    }
-    LaunchedEffect(settleDebtState) {
-        if (settleDebtState is SettleDebtState.Success) { showSettleDebtDialog = false; expenseViewModel.resetSettleDebtState() }
     }
     LaunchedEffect(addMemberState) {
         if (addMemberState is AddMemberState.Success) {
@@ -271,7 +266,15 @@ fun GroupDetailScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (selectedTab == 0) {
-                    BalancesSection(group = group, userNames = miembrosNombres, moneda = group.moneda, onLiquidarDebt = { showSettleDebtDialog = true })
+                    BalancesSection(
+                        group = group,
+                        userNames = miembrosNombres,
+                        moneda = group.moneda,
+                        currentUserId = currentUserId,
+                        onConfirmSettlement = { groupViewModel.confirmSettlement(groupId) },
+                        onCancelSettlement = { groupViewModel.cancelSettlement(groupId) },
+                        isSettlementLoading = settlementState is SettlementState.Loading
+                    )
                 } else {
                     when (val state = expensesState) {
                         is ExpensesUiState.Loading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -329,18 +332,6 @@ fun GroupDetailScreen(
                     }
                 }
             }
-        )
-    }
-
-    if (showSettleDebtDialog && group != null) {
-        SettleDebtDialog(
-            transactions = optimizedTransactions,
-            userNames = miembrosNombres,
-            moneda = group.moneda,
-            isLoading = settleDebtState is SettleDebtState.Loading,
-            errorMessage = (settleDebtState as? SettleDebtState.Error)?.message,
-            onDismiss = { showSettleDebtDialog = false; expenseViewModel.resetSettleDebtState() },
-            onConfirm = { expenseViewModel.settleDebt() }
         )
     }
 

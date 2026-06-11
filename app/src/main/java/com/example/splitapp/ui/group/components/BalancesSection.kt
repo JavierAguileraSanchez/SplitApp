@@ -1,6 +1,7 @@
 package com.example.splitapp.ui.group.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +40,10 @@ fun BalancesSection(
     group: Group,
     userNames: Map<String, String>,
     moneda: String,
-    onLiquidarDebt: () -> Unit
+    currentUserId: String,
+    onConfirmSettlement: () -> Unit,
+    onCancelSettlement: () -> Unit,
+    isSettlementLoading: Boolean
 ) {
     if (group.miembros.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -47,6 +51,13 @@ fun BalancesSection(
         }
         return
     }
+
+    val creditors = group.balancesCentimos.filter { it.value > 0 }.keys.toSet()
+    val confirmations = group.liquidacionPendiente?.confirmaciones ?: emptyList()
+    val isCreditor = currentUserId in creditors
+    val hasConfirmed = currentUserId in confirmations
+    val confirmedCount = confirmations.count { it in creditors }
+    val totalCreditors = creditors.size
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -74,11 +85,22 @@ fun BalancesSection(
             }
         }
 
+        val buttonText = when {
+            hasConfirmed -> stringResource(R.string.settle_cancel_confirmation, confirmedCount, totalCreditors)
+            isCreditor   -> stringResource(R.string.settle_confirm_progress, confirmedCount, totalCreditors)
+            else         -> stringResource(R.string.settle_awaiting, confirmedCount, totalCreditors)
+        }
+
+        val isEnabled = isCreditor && !isSettlementLoading && totalCreditors > 0
+
         ExtendedFloatingActionButton(
-            onClick = onLiquidarDebt,
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            onClick = { if (isEnabled) { if (hasConfirmed) onCancelSettlement() else onConfirmSettlement() } },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .alpha(if (isEnabled) 1f else 0.4f),
             icon = { Icon(Icons.Default.SwapHoriz, contentDescription = null) },
-            text = { Text(stringResource(R.string.balances_settle_debt)) }
+            text = { Text(buttonText) }
         )
     }
 }

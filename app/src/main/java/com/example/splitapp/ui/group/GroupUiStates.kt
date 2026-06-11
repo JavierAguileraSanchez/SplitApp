@@ -50,3 +50,10 @@ sealed class ExportEvent {
     data class Success(val filePath: String) : ExportEvent()
     data class Error(val message: String) : ExportEvent()
 }
+
+sealed class SettlementState {
+    data object Idle : SettlementState()
+    data object Loading : SettlementState()
+    data object Success : SettlementState()
+    data class Error(val message: String) : SettlementState()
+}

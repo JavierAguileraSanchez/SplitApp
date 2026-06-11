@@ -1,87 +1,54 @@
-# Handoff: SplitApp — Estado completo del proyecto
+# SplitApp — Handoff
 
-## ✅ COMPLETADO: Sistema i18n EN/ES
+## Resumen del proyecto
 
-Todos los archivos tienen `stringResource`. El mecanismo:
-1. `MainActivity.attachBaseContext` aplica el locale guardado en SharedPreferences
-2. Cambio de idioma → `LocaleManager.setLanguage()` + `activity.recreate()`
-3. ViewModels y NavController sobreviven el `recreate()`
+SplitApp es una app Android (Jetpack Compose + Firebase) para dividir gastos entre grupos de personas. Cada grupo tiene miembros, gastos compartidos y balances en céntimos. La moneda se elige por grupo (EUR/USD/GBP). La app está en ES/EN con selector de idioma.
 
-### Archivos i18n completados
-| Archivo | Estado |
-|---------|--------|
-| `util/LocaleManager.kt` | ✅ LANG_EN/LANG_ES, SharedPreferences, applyLocale |
-| `res/values/strings.xml` | ✅ inglés (default) |
-| `res/values-es/strings.xml` | ✅ español |
-| `MainActivity.kt` | ✅ attachBaseContext + onLanguageChange + recreate() |
-| `ui/navigation/NavGraph.kt` | ✅ onLanguageChange propagado a Login y GroupList |
-| `ui/auth/LoginScreen.kt` | ✅ toggle EN\|ES top-right en Box |
-| `ui/auth/RegisterScreen.kt` | ✅ stringResource en todos los strings |
-| `ui/group/GroupListScreen.kt` | ✅ onLanguageChange param + stringResource |
-| `ui/group/components/ProfileDialog.kt` | ✅ onLanguageChange + SingleChoiceSegmentedButtonRow ES/EN |
-| `ui/group/GroupDetailScreen.kt` | ✅ strings pre-resueltos para LaunchedEffect/lambdas |
-| `ui/group/GroupActionConfirmDialog.kt` | ✅ |
-| `ui/group/components/AddExpenseDialog.kt` | ✅ |
-| `ui/group/components/BalancesSection.kt` | ✅ |
-| `ui/group/components/ExpensesSection.kt` | ✅ |
-| `ui/group/components/SettleDebtDialog.kt` | ✅ |
-| `ui/group/components/AddMemberDialog.kt` | ✅ |
-| `ui/group/components/CreateGroupDialog.kt` | ✅ |
-| `ui/group/components/JoinGroupDialog.kt` | ✅ |
-| `ui/group/components/GroupCard.kt` | ✅ |
-| `ui/group/components/GroupDescriptionAccordion.kt` | ✅ |
+**Stack**: Kotlin, Jetpack Compose, Firebase Auth, Firestore. Arquitectura: ViewModel + UseCases + Repository.
 
-### Notas i18n
-- `@OptIn(ExperimentalMaterial3Api::class)` requerido en ProfileDialog y CreateGroupDialog (SegmentedButton)
-- Strings usados en LaunchedEffect/lambdas deben pre-resolverse con `val x = stringResource(...)` antes del LaunchedEffect
-- `%` literal en XML → `%%`
+**Funcionalidades implementadas**:
+- Registro e inicio de sesión (Firebase Auth)
+- Crear grupos, añadir gastos, ver balances por miembro
+- Simplificación de deudas (algoritmo de transferencias mínimas)
+- Sistema de invitaciones: enviar, aceptar, rechazar (con bloqueo tras 2 rechazos)
+- Badge de invitaciones pendientes en la lista de grupos
+- Selector de moneda por grupo
+- i18n ES/EN
 
 ---
 
-## ✅ COMPLETADO: Selector de moneda por grupo
+## Próxima funcionalidad: confirmación mutua para liquidar deudas
 
-Cada grupo tiene su propia moneda (EUR/USD/GBP). Se elige al crear el grupo.
+### Descripción
 
-### Archivos modificados
-| Archivo | Cambio |
-|---------|--------|
-| `data/model/Group.kt` | Nuevo campo `val moneda: String = "EUR"` |
-| `util/MoneyExtensions.kt` | Nueva función `Long.formatMoney(moneda: String)` — devuelve `3.50€`, `$3.50` o `£3.50` |
-| `domain/repository/GroupRepository.kt` | `createGroup()` acepta `moneda: String = "EUR"` |
-| `data/repository/GroupRepositoryImpl.kt` | Pasa `moneda` al crear el documento en Firestore |
-| `domain/usecase/group/CreateGroupUseCase.kt` | Acepta y propaga `moneda` |
-| `ui/group/GroupViewModel.kt` | `createGroup()` acepta `moneda` |
-| `ui/group/components/CreateGroupDialog.kt` | `SingleChoiceSegmentedButtonRow` con `€ EUR / $ USD / £ GBP` + params `selectedMoneda`/`onMonedaChange` |
-| `ui/group/GroupListScreen.kt` | Estado `groupMoneda`, pasado al dialog y al ViewModel |
-| `ui/group/components/GroupCard.kt` | Usa `formatMoney(group.moneda)` |
-| `ui/group/components/BalancesSection.kt` | Acepta `moneda`, usa `formatMoney()` |
-| `ui/group/components/ExpensesSection.kt` | Acepta `moneda`, usa `formatMoney()` |
-| `ui/group/components/SettleDebtDialog.kt` | Acepta `moneda`, usa `formatMoney()` |
-| `ui/group/components/AddExpenseDialog.kt` | Acepta `moneda`, usa `formatMoney()` (reemplaza `€` hardcodeado) |
-| `ui/group/GroupDetailScreen.kt` | Pasa `group.moneda` a todos los componentes anteriores |
-| `res/values/strings.xml` | `create_group_currency_label = "Currency"` |
-| `res/values-es/strings.xml` | `create_group_currency_label = "Moneda"` |
+Actualmente el botón "Liquidar deudas" en `GroupDetailScreen` ejecuta la liquidación directamente. El objetivo es añadir un flujo de confirmación mutua entre los acreedores antes de que la liquidación tenga efecto.
 
-### Nota
-El resumen global de GroupListScreen (`totalQueDebo`/`totalQueMeDeben`) sigue usando `formatEuros()` ya que agrega grupos de distintas monedas — es una limitación conocida pendiente de diseño.
+### Comportamiento esperado
 
----
+- El botón **solo es pulsable** para los miembros con balance positivo (les deben dinero). Los miembros con balance negativo ven el botón desactivado.
+- Al pulsar, el usuario registra su confirmación en Firestore.
+- El botón muestra el progreso: **`X/N`** donde N = total de acreedores del grupo, X = cuántos han confirmado ya.
+- Un acreedor que ya ha confirmado puede **cancelar** su confirmación pulsando el mismo botón (que mostrará la acción de cancelar).
+- Cuando **todos** los acreedores confirman (X == N), se ejecuta la liquidación: los balances de todos los implicados se resetean a 0.
 
-## Estado del repositorio Git
+### Datos en Firestore
 
-El proyecto fue descargado como ZIP desde:
-`https://github.com/JavierAguileraSanchez/SplitApp.git`
+Añadir un campo al documento del grupo:
 
-Para subir cambios desde cero (sin historial git local):
-```powershell
-cd "C:\Users\javoa\Desktop\SplitApp-main"
-git init
-git remote add origin https://github.com/JavierAguileraSanchez/SplitApp.git
-git fetch origin
-git branch -M main
-git reset --mixed origin/main
-git add .
-git commit -m "descripción del cambio"
-git push origin main
 ```
-Si la rama es `master`, sustituir `main` por `master`.
+grupos/{groupId}:
+  liquidacionPendiente: {
+    confirmaciones: [uid1, uid2, ...]   // acreedores que han confirmado
+  }
+```
+
+Usar `FieldValue.arrayUnion(uid)` al confirmar y `FieldValue.arrayRemove(uid)` al cancelar.
+
+### Archivos a modificar
+
+- `Group.kt` — añadir campo `liquidacionPendiente` al modelo
+- `GroupRepositoryImpl.kt` — métodos confirm/cancel con arrayUnion/arrayRemove, y lógica de liquidación cuando X == N
+- `GroupViewModel.kt` — métodos `confirmSettlement()` / `cancelSettlement()`
+- `GroupDetailScreen.kt` — UI del botón con contador X/N y estado de cancelar
+- `GroupUiStates.kt` — añadir estado para el proceso si es necesario
+- Firestore rules — permitir update de `liquidacionPendiente` a miembros activos

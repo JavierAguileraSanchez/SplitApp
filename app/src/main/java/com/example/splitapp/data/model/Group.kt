@@ -5,6 +5,10 @@ import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
 
+data class LiquidacionPendiente(
+    val confirmaciones: List<String> = emptyList()
+)
+
 data class Group(
     @DocumentId val id: String = "",
     val nombreGrupo: String = "",
@@ -14,6 +18,7 @@ data class Group(
     val balancesCentimos: Map<String, Long> = emptyMap(),
     val descripcion: String = "",
     val moneda: String = "EUR",
+    val liquidacionPendiente: LiquidacionPendiente? = null,
     @ServerTimestamp val updatedAt: Timestamp? = null
 ) {
     @get:Exclude

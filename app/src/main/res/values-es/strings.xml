@@ -85,6 +85,9 @@
     <string name="balances_no_members">No hay miembros registrados</string>
     <string name="balances_current">Balances actuales</string>
     <string name="balances_settle_debt">Liquidar deuda</string>
+    <string name="settle_confirm_progress">Confirmar liquidación (%1$d/%2$d)</string>
+    <string name="settle_cancel_confirmation">Cancelar confirmación (%1$d/%2$d)</string>
+    <string name="settle_awaiting">Esperando liquidación (%1$d/%2$d)</string>
     <string name="balance_owed_to_them">Le deben: %1$s</string>
     <string name="balance_owes">Debe: %1$s</string>
     <string name="balance_neutral">Saldo neutro</string>

@@ -84,6 +84,9 @@ class GroupViewModel(
     private val _groupActionState = MutableStateFlow<GroupActionState>(GroupActionState.Idle)
     val groupActionState: StateFlow<GroupActionState> = _groupActionState
 
+    private val _settlementState = MutableStateFlow<SettlementState>(SettlementState.Idle)
+    val settlementState: StateFlow<SettlementState> = _settlementState
+
     private val _joinGroupState = MutableStateFlow<JoinGroupState>(JoinGroupState.Idle)
     val joinGroupState: StateFlow<JoinGroupState> = _joinGroupState
 
@@ -207,9 +210,28 @@ class GroupViewModel(
     fun getOptimizedTransfers(balances: Map<String, Long>): List<Transferencia> =
         simplifyDebtsUseCase(balances)
 
-    fun resetCreateGroupState() { _createGroupState.value = CreateGroupState.Idle }
-    fun resetAddMemberState()   { _addMemberState.value = AddMemberState.Idle }
-    fun resetGroupActionState() { _groupActionState.value = GroupActionState.Idle }
-    fun resetJoinGroupState()   { _joinGroupState.value = JoinGroupState.Idle }
-    fun resetSearchState()      { _searchQuery.value = ""; _userSearchState.value = UserSearchState.Idle }
+    fun confirmSettlement(groupId: String) {
+        viewModelScope.launch {
+            _settlementState.value = SettlementState.Loading
+            groupRepository.confirmSettlement(groupId, currentUserId)
+                .onSuccess { _settlementState.value = SettlementState.Success }
+                .onFailure { _settlementState.value = SettlementState.Error(it.message ?: "Error") }
+        }
+    }
+
+    fun cancelSettlement(groupId: String) {
+        viewModelScope.launch {
+            _settlementState.value = SettlementState.Loading
+            groupRepository.cancelSettlement(groupId, currentUserId)
+                .onSuccess { _settlementState.value = SettlementState.Success }
+                .onFailure { _settlementState.value = SettlementState.Error(it.message ?: "Error") }
+        }
+    }
+
+    fun resetCreateGroupState()  { _createGroupState.value = CreateGroupState.Idle }
+    fun resetAddMemberState()    { _addMemberState.value = AddMemberState.Idle }
+    fun resetGroupActionState()  { _groupActionState.value = GroupActionState.Idle }
+    fun resetJoinGroupState()    { _joinGroupState.value = JoinGroupState.Idle }
+    fun resetSearchState()       { _searchQuery.value = ""; _userSearchState.value = UserSearchState.Idle }
+    fun resetSettlementState()   { _settlementState.value = SettlementState.Idle }
 }

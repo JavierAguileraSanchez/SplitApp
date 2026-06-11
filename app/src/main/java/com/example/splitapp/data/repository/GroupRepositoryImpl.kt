@@ -142,6 +142,49 @@ class GroupRepositoryImpl : FirestoreRepository(), GroupRepository {
         return result
     }
 
+    override suspend fun confirmSettlement(groupId: String, userId: String): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
+            val groupRef = firestore.collection("grupos").document(groupId)
+            firestore.runTransaction { tx ->
+                val group = tx.get(groupRef).toObject(Group::class.java)
+                    ?: error("Grupo no encontrado")
+                val creditors = group.balancesCentimos.filter { it.value > 0 }.keys.toSet()
+                val current = group.liquidacionPendiente?.confirmaciones ?: emptyList()
+                val updated = (current + userId).distinct()
+
+                if (creditors.isNotEmpty() && updated.containsAll(creditors)) {
+                    val resetBalances = group.balancesCentimos.mapValues { 0L }
+                    tx.update(groupRef, mapOf(
+                        "balancesCentimos"    to resetBalances,
+                        "liquidacionPendiente" to null,
+                        "updatedAt"           to FieldValue.serverTimestamp()
+                    ))
+                } else {
+                    tx.update(groupRef, mapOf(
+                        "liquidacionPendiente" to mapOf("confirmaciones" to updated),
+                        "updatedAt"            to FieldValue.serverTimestamp()
+                    ))
+                }
+            }.await()
+        }
+    }
+
+    override suspend fun cancelSettlement(groupId: String, userId: String): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
+            val groupRef = firestore.collection("grupos").document(groupId)
+            firestore.runTransaction { tx ->
+                val group = tx.get(groupRef).toObject(Group::class.java)
+                    ?: error("Grupo no encontrado")
+                val current = group.liquidacionPendiente?.confirmaciones ?: emptyList()
+                val updated = current.filter { it != userId }
+                tx.update(groupRef, mapOf(
+                    "liquidacionPendiente" to mapOf("confirmaciones" to updated),
+                    "updatedAt"            to FieldValue.serverTimestamp()
+                ))
+            }.await()
+        }
+    }
+
     override suspend fun leaveGroup(groupId: String, userId: String): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
             val groupRef = firestore.collection("grupos").document(groupId)
