@@ -96,7 +96,7 @@ fun BalancesSection(
         ExtendedFloatingActionButton(
             onClick = { if (isEnabled) { if (hasConfirmed) onCancelSettlement() else onConfirmSettlement() } },
             modifier = Modifier
-                .align(Alignment.BottomEnd)
+                .align(Alignment.BottomStart)
                 .padding(16.dp)
                 .alpha(if (isEnabled) 1f else 0.4f),
             icon = { Icon(Icons.Default.SwapHoriz, contentDescription = null) },
