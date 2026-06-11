@@ -70,7 +70,7 @@
     <string name="group_back_cd">Back</string>
     <string name="group_link_copied">Invitation link copied</string>
     <string name="group_invitation_link_label">Invitation link</string>
-    <string name="group_export_success">History exported successfully at %1$s</string>
+    <string name="group_export_success">Saved to Downloads: %1$s</string>
 
     <!-- Add Expense Dialog -->
     <string name="add_expense_title">Add new expense</string>
@@ -199,4 +199,10 @@
     <string name="invitation_already_pending">There is already a pending invitation for this user</string>
     <string name="invitation_already_member">This user is already a member of the group</string>
     <string name="invitations_icon_cd">Invitations</string>
+
+    <!-- Chat -->
+    <string name="group_tab_chat">Chat</string>
+    <string name="chat_message_hint">Write a message…</string>
+    <string name="chat_send_cd">Send</string>
+    <string name="chat_empty">No messages yet. Say hi!</string>
 </resources>

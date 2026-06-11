@@ -49,6 +49,8 @@ import com.example.splitapp.R
 import com.example.splitapp.ui.expense.AddExpenseState
 import com.example.splitapp.ui.expense.ExpensesUiState
 import com.example.splitapp.ui.expense.ExpenseViewModel
+import com.example.splitapp.ui.chat.ChatScreen
+import com.example.splitapp.ui.chat.ChatViewModel
 import com.example.splitapp.ui.group.components.AddExpenseDialog
 import com.example.splitapp.ui.group.components.AddMemberDialog
 import com.example.splitapp.ui.group.components.BalancesSection
@@ -66,6 +68,7 @@ fun GroupDetailScreen(
     groupId: String,
     expenseViewModel: ExpenseViewModel,
     groupViewModel: GroupViewModel,
+    chatViewModel: ChatViewModel,
     onNavigateBack: () -> Unit
 ) {
     val groups by groupViewModel.groups.collectAsState()
@@ -216,9 +219,7 @@ fun GroupDetailScreen(
                                 text = { Text(stringResource(R.string.group_export_expenses)) },
                                 leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
                                 onClick = {
-                                    val externalDir = context.getExternalFilesDir(null)
-                                    val targetDir = if (externalDir != null && externalDir.canWrite()) externalDir else context.cacheDir
-                                    groupViewModel.exportGroupExpenses(groupId, targetDir)
+                                    groupViewModel.exportGroupExpenses(groupId, context)
                                     showTopBarMenu = false
                                 }
                             )
@@ -233,8 +234,10 @@ fun GroupDetailScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddExpenseDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.group_add_expense_cd))
+            if (selectedTab != 2) {
+                FloatingActionButton(onClick = { showAddExpenseDialog = true }) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.group_add_expense_cd))
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.End
@@ -269,10 +272,15 @@ fun GroupDetailScreen(
                         onClick = { selectedTab = 1 },
                         text = { Text(stringResource(R.string.group_tab_expenses)) }
                     )
+                    Tab(
+                        selected = selectedTab == 2,
+                        onClick = { selectedTab = 2 },
+                        text = { Text(stringResource(R.string.group_tab_chat)) }
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                if (selectedTab == 0) {
-                    BalancesSection(
+                when (selectedTab) {
+                    0 -> BalancesSection(
                         group = group,
                         userNames = miembrosNombres,
                         memberProfiles = memberProfiles,
@@ -283,8 +291,7 @@ fun GroupDetailScreen(
                         onMemberClick = { selectedMemberId = it },
                         isSettlementLoading = settlementState is SettlementState.Loading
                     )
-                } else {
-                    when (val state = expensesState) {
+                    1 -> when (val state = expensesState) {
                         is ExpensesUiState.Loading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                         is ExpensesUiState.Error   -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(text = state.message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -293,9 +300,11 @@ fun GroupDetailScreen(
                             expenses = state.expenses,
                             userNames = miembrosNombres,
                             moneda = group.moneda,
+                            currentUserId = currentUserId,
                             onDeleteExpense = { expenseViewModel.deleteExpense(it) }
                         )
                     }
+                    else -> ChatScreen(chatViewModel = chatViewModel, memberProfiles = memberProfiles)
                 }
             }
         }

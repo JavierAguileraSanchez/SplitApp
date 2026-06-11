@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.example.splitapp.data.repository.ChatRepositoryImpl
 import com.example.splitapp.data.repository.ExpenseRepositoryImpl
 import com.example.splitapp.domain.repository.GroupRepository
 import com.example.splitapp.domain.repository.InvitationRepository
@@ -18,6 +19,8 @@ import com.example.splitapp.domain.usecase.expense.DeleteExpenseUseCase
 import com.example.splitapp.domain.usecase.expense.ExportExpensesToCsvUseCase
 import com.example.splitapp.domain.usecase.expense.GetExpensesUseCase
 import com.example.splitapp.domain.usecase.expense.SettleDebtUseCase
+import com.example.splitapp.domain.usecase.chat.GetMessagesUseCase
+import com.example.splitapp.domain.usecase.chat.SendMessageUseCase
 import com.example.splitapp.domain.usecase.group.AddMemberUseCase
 import com.example.splitapp.domain.usecase.group.CreateGroupUseCase
 import com.example.splitapp.domain.usecase.group.GetGroupsUseCase
@@ -29,6 +32,7 @@ import com.example.splitapp.domain.usecase.invitation.SendInvitationUseCase
 import com.example.splitapp.ui.auth.AuthViewModel
 import com.example.splitapp.ui.auth.LoginScreen
 import com.example.splitapp.ui.auth.RegisterScreen
+import com.example.splitapp.ui.chat.ChatViewModel
 import com.example.splitapp.ui.expense.ExpenseViewModel
 import com.example.splitapp.ui.group.DebtorsScreen
 import com.example.splitapp.ui.group.GroupDetailScreen
@@ -239,10 +243,21 @@ fun NavGraph(
                     groupRepository = groupRepository
                 )
             }
+            val chatRepository = remember { ChatRepositoryImpl() }
+            val chatViewModel = viewModel<ChatViewModel> {
+                ChatViewModel(
+                    getMessagesUseCase = GetMessagesUseCase(chatRepository),
+                    sendMessageUseCase = SendMessageUseCase(chatRepository),
+                    getUserNamesUseCase = getUserNamesUseCase,
+                    groupId = groupId,
+                    currentUserId = currentUserId
+                )
+            }
             GroupDetailScreen(
                 groupId = groupId,
                 expenseViewModel = expenseViewModel,
                 groupViewModel = groupViewModel,
+                chatViewModel = chatViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 }

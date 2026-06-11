@@ -49,6 +49,7 @@ fun ExpensesSection(
     expenses: List<Expense>,
     userNames: Map<String, String>,
     moneda: String,
+    currentUserId: String,
     onDeleteExpense: (String) -> Unit
 ) {
     if (expenses.isEmpty()) {
@@ -93,6 +94,7 @@ fun ExpensesSection(
                     expense = expense,
                     userNames = userNames,
                     moneda = moneda,
+                    canDelete = expense.pagadoPor == currentUserId,
                     onDeleteExpense = onDeleteExpense
                 )
             }
@@ -105,6 +107,7 @@ fun ExpenseItem(
     expense: Expense,
     userNames: Map<String, String>,
     moneda: String,
+    canDelete: Boolean,
     onDeleteExpense: (String) -> Unit
 ) {
     var showDeleteConfirm by remember { mutableStateOf(false) }
@@ -146,15 +149,17 @@ fun ExpenseItem(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(
-                    onClick = { showDeleteConfirm = true },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.expense_delete_cd),
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                if (canDelete) {
+                    IconButton(
+                        onClick = { showDeleteConfirm = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.expense_delete_cd),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(6.dp))

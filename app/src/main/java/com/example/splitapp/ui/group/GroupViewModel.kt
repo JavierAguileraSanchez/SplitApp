@@ -1,8 +1,14 @@
 package com.example.splitapp.ui.group
 
+import android.content.ContentValues
+import android.content.Context
+import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.example.splitapp.data.model.Group
 import com.example.splitapp.data.model.User
 import com.example.splitapp.domain.repository.GroupRepository
@@ -194,12 +200,40 @@ class GroupViewModel(
         }
     }
 
-    fun exportGroupExpenses(groupId: String, outputDirectory: java.io.File) {
+    fun exportGroupExpenses(groupId: String, context: Context) {
+        val appContext = context.applicationContext
         viewModelScope.launch {
             _exportEvent.emit(ExportEvent.Loading)
-            exportExpensesToCsvUseCase(groupId, outputDirectory)
-                .onSuccess { _exportEvent.emit(ExportEvent.Success(it.absolutePath)) }
-                .onFailure { _exportEvent.emit(ExportEvent.Error(it.message ?: "Error al exportar")) }
+            exportExpensesToCsvUseCase(groupId, appContext.cacheDir)
+                .fold(
+                    onSuccess = { file ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val result = withContext(Dispatchers.IO) {
+                                runCatching {
+                                    val values = ContentValues().apply {
+                                        put(MediaStore.Downloads.DISPLAY_NAME, file.name)
+                                        put(MediaStore.Downloads.MIME_TYPE, "text/csv")
+                                    }
+                                    val uri = appContext.contentResolver.insert(
+                                        MediaStore.Downloads.EXTERNAL_CONTENT_URI, values
+                                    ) ?: error("No se pudo crear la entrada en Descargas")
+                                    appContext.contentResolver.openOutputStream(uri)?.use { out ->
+                                        file.inputStream().use { it.copyTo(out) }
+                                    }
+                                    file.delete()
+                                    file.name
+                                }
+                            }
+                            result.fold(
+                                onSuccess = { name -> _exportEvent.emit(ExportEvent.Success(name)) },
+                                onFailure = { _exportEvent.emit(ExportEvent.Error(it.message ?: "Error al guardar en Descargas")) }
+                            )
+                        } else {
+                            _exportEvent.emit(ExportEvent.Success(file.absolutePath))
+                        }
+                    },
+                    onFailure = { _exportEvent.emit(ExportEvent.Error(it.message ?: "Error al exportar")) }
+                )
         }
     }
 
@@ -207,6 +241,13 @@ class GroupViewModel(
 
     fun deleteGroup(groupId: String) {
         viewModelScope.launch {
+            val group = groups.value.firstOrNull { it.id == groupId }
+            if (group != null && group.balancesCentimos.values.any { it != 0L }) {
+                _groupActionState.value = GroupActionState.Error(
+                    "No se puede eliminar el grupo mientras haya deudas pendientes"
+                )
+                return@launch
+            }
             _groupActionState.value = GroupActionState.Loading
             groupRepository.deleteGroup(groupId)
                 .onSuccess { _groupActionState.value = GroupActionState.Success }
@@ -216,6 +257,13 @@ class GroupViewModel(
 
     fun leaveGroup(groupId: String) {
         viewModelScope.launch {
+            val group = groups.value.firstOrNull { it.id == groupId }
+            if (group != null && group.balancesCentimos.values.any { it != 0L }) {
+                _groupActionState.value = GroupActionState.Error(
+                    "No se puede salir del grupo mientras haya deudas pendientes"
+                )
+                return@launch
+            }
             _groupActionState.value = GroupActionState.Loading
             groupRepository.leaveGroup(groupId, currentUserId)
                 .onSuccess { _groupActionState.value = GroupActionState.Success }
