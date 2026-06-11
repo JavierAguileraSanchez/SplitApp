@@ -2,6 +2,7 @@ package com.example.splitapp.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -29,12 +30,13 @@ import com.example.splitapp.ui.auth.AuthViewModel
 import com.example.splitapp.ui.auth.LoginScreen
 import com.example.splitapp.ui.auth.RegisterScreen
 import com.example.splitapp.ui.expense.ExpenseViewModel
+import com.example.splitapp.ui.group.DebtorsScreen
 import com.example.splitapp.ui.group.GroupDetailScreen
 import com.example.splitapp.ui.group.GroupListScreen
 import com.example.splitapp.ui.group.GroupViewModel
-import com.example.splitapp.ui.group.DebtorsScreen
 import com.example.splitapp.ui.invitation.InvitationViewModel
 import com.example.splitapp.ui.invitation.InvitationsScreen
+import com.example.splitapp.util.ThemeManager
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -45,6 +47,8 @@ fun NavGraph(
     invitationRepository: InvitationRepository,
     exportExpensesToCsvUseCase: ExportExpensesToCsvUseCase,
     getUserNamesUseCase: GetUserNamesUseCase,
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     onLanguageChange: (String) -> Unit
 ) {
     val startDestination = if (FirebaseAuth.getInstance().currentUser != null) {
@@ -58,12 +62,24 @@ fun NavGraph(
         startDestination = startDestination
     ) {
         composable(Screen.Login.route) {
+            val context = LocalContext.current
             LoginScreen(
                 authViewModel = authViewModel,
+                isDarkTheme = isDarkTheme,
+                onThemeChange = onThemeChange,
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register.route)
                 },
                 onNavigateToGroupList = {
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    val saved = ThemeManager.getUserTheme(context, userId)
+                    if (saved == null) {
+                        // First time (register path): save selected theme for this user
+                        ThemeManager.setUserTheme(context, userId, isDarkTheme)
+                    } else if (saved != isDarkTheme) {
+                        // Login path: restore user's saved preference
+                        onThemeChange(saved)
+                    }
                     navController.navigate(Screen.GroupList.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -73,12 +89,22 @@ fun NavGraph(
         }
 
         composable(Screen.Register.route) {
+            val context = LocalContext.current
             RegisterScreen(
                 authViewModel = authViewModel,
+                isDarkTheme = isDarkTheme,
+                onThemeChange = onThemeChange,
                 onNavigateToLogin = {
                     navController.popBackStack()
                 },
                 onNavigateToGroupList = {
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    val saved = ThemeManager.getUserTheme(context, userId)
+                    if (saved == null) {
+                        ThemeManager.setUserTheme(context, userId, isDarkTheme)
+                    } else if (saved != isDarkTheme) {
+                        onThemeChange(saved)
+                    }
                     navController.navigate(Screen.GroupList.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
@@ -140,6 +166,8 @@ fun NavGraph(
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                isDarkTheme = isDarkTheme,
+                onThemeChange = onThemeChange,
                 onLanguageChange = onLanguageChange
             )
         }

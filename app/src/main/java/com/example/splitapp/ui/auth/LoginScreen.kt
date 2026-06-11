@@ -47,6 +47,8 @@ import com.example.splitapp.util.LocaleManager
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel,
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToGroupList: () -> Unit,
     onLanguageChange: (String) -> Unit
@@ -169,6 +171,49 @@ fun LoginScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable { onNavigateToRegister() }
+                )
+            }
+        }
+
+        // Theme toggle — top-left corner
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(top = 8.dp, start = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { if (isDarkTheme) onThemeChange(false) },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.theme_light),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (!isDarkTheme) FontWeight.Bold else FontWeight.Normal,
+                    color = if (!isDarkTheme)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                )
+            }
+            Text(
+                text = "|",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            )
+            TextButton(
+                onClick = { if (!isDarkTheme) onThemeChange(true) },
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.theme_dark),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (isDarkTheme) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isDarkTheme)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                 )
             }
         }

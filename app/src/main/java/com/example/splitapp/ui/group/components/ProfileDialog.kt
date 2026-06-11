@@ -45,6 +45,8 @@ import com.example.splitapp.ui.profile.ProfileState
 import com.example.splitapp.ui.profile.UpdateProfileState
 import com.example.splitapp.ui.profile.UploadPhotoState
 import com.example.splitapp.util.LocaleManager
+import com.example.splitapp.util.ThemeManager
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +61,8 @@ fun ProfileDialog(
     onResetUploadPhoto: () -> Unit,
     onDismiss: () -> Unit,
     onLogout: () -> Unit,
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     onLanguageChange: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -208,6 +212,27 @@ fun ProfileDialog(
                                 SegmentedButton(
                                     selected = currentLanguage == code,
                                     onClick = { onLanguageChange(code) },
+                                    shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
+                                    label = { Text(label) }
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(text = stringResource(R.string.theme_label), style = MaterialTheme.typography.labelMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                            listOf(
+                                false to stringResource(R.string.theme_light),
+                                true  to stringResource(R.string.theme_dark)
+                            ).forEachIndexed { index, (dark, label) ->
+                                SegmentedButton(
+                                    selected = isDarkTheme == dark,
+                                    onClick = {
+                                        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                        ThemeManager.setUserTheme(context, userId, dark)
+                                        onThemeChange(dark)
+                                    },
                                     shape = SegmentedButtonDefaults.itemShape(index = index, count = 2),
                                     label = { Text(label) }
                                 )

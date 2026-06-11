@@ -70,6 +70,8 @@ fun GroupListScreen(
     onNavigateToDebtors: () -> Unit,
     onNavigateToLogin: () -> Unit,
     deepLinkGroupId: String? = null,
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
     onLanguageChange: (String) -> Unit
 ) {
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -176,6 +178,8 @@ fun GroupListScreen(
             onResetUploadPhoto = profileViewModel::resetUploadPhotoState,
             onDismiss = { showProfileDialog = false },
             onLogout = { showProfileDialog = false; onNavigateToLogin() },
+            isDarkTheme = isDarkTheme,
+            onThemeChange = onThemeChange,
             onLanguageChange = onLanguageChange
         )
     }

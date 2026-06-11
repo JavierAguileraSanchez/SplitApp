@@ -9,6 +9,11 @@
     <string name="choose_from_gallery">Choose from gallery</string>
     <string name="take_photo">Take photo</string>
 
+    <!-- Theme -->
+    <string name="theme_label">Appearance</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
     <!-- Language -->
     <string name="lang_en">EN</string>
     <string name="lang_es">ES</string>

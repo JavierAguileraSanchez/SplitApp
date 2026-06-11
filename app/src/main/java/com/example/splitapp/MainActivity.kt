@@ -5,10 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.splitapp.data.repository.AuthRepositoryImpl
 import com.example.splitapp.data.repository.ExpenseRepositoryImpl
@@ -24,6 +26,7 @@ import com.example.splitapp.ui.auth.AuthViewModel
 import com.example.splitapp.ui.navigation.NavGraph
 import com.example.splitapp.ui.theme.SplitAppTheme
 import com.example.splitapp.util.LocaleManager
+import com.example.splitapp.util.ThemeManager
 
 class MainActivity : ComponentActivity() {
 
@@ -34,37 +37,37 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val initialDark = ThemeManager.getTheme(this)
         setContent {
-            SplitAppTheme {
+            val isDarkTheme = remember { mutableStateOf(initialDark) }
+            SplitAppTheme(darkTheme = isDarkTheme.value) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.background
+                ) {
                 SplitAppNavigation(
+                    isDarkTheme = isDarkTheme.value,
+                    onThemeChange = { dark ->
+                        isDarkTheme.value = dark
+                        ThemeManager.setTheme(this, dark)
+                    },
                     onLanguageChange = { language ->
                         LocaleManager.setLanguage(this, language)
                         recreate()
                     }
                 )
+                } // end Surface
             }
         }
     }
 }
 
 @Composable
-fun rememberFirebaseAuthUserId(): String {
-    val userIdState = remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.uid ?: "") }
-    DisposableEffect(Unit) {
-        val auth = FirebaseAuth.getInstance()
-        val listener = FirebaseAuth.AuthStateListener { authState ->
-            userIdState.value = authState.currentUser?.uid ?: ""
-        }
-        auth.addAuthStateListener(listener)
-        onDispose {
-            auth.removeAuthStateListener(listener)
-        }
-    }
-    return userIdState.value
-}
-
-@Composable
-fun SplitAppNavigation(onLanguageChange: (String) -> Unit) {
+fun SplitAppNavigation(
+    isDarkTheme: Boolean,
+    onThemeChange: (Boolean) -> Unit,
+    onLanguageChange: (String) -> Unit
+) {
     val navController = rememberNavController()
     val authRepository = remember { AuthRepositoryImpl() }
     val groupRepository = remember { GroupRepositoryImpl() }
@@ -83,6 +86,8 @@ fun SplitAppNavigation(onLanguageChange: (String) -> Unit) {
         invitationRepository = invitationRepository,
         exportExpensesToCsvUseCase = exportExpensesToCsvUseCase,
         getUserNamesUseCase = getUserNamesUseCase,
+        isDarkTheme = isDarkTheme,
+        onThemeChange = onThemeChange,
         onLanguageChange = onLanguageChange
     )
 }
