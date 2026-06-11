@@ -37,6 +37,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.splitapp.R
@@ -143,8 +145,15 @@ private fun MessageBubble(message: ChatMessage, isOwn: Boolean, photoUrl: String
         SimpleDateFormat("HH:mm", Locale.getDefault()).format(it)
     } ?: ""
 
+    val semanticDesc = if (isOwn)
+        "${message.text}${if (timeStr.isNotEmpty()) ", $timeStr" else ""}"
+    else
+        "${message.userName}: ${message.text}${if (timeStr.isNotEmpty()) ", $timeStr" else ""}"
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clearAndSetSemantics { contentDescription = semanticDesc },
         horizontalArrangement = horizontalArrangement,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -152,7 +161,8 @@ private fun MessageBubble(message: ChatMessage, isOwn: Boolean, photoUrl: String
             UserAvatar(
                 name = message.userName,
                 photoUrl = photoUrl,
-                size = 32.dp
+                size = 32.dp,
+                contentDescription = message.userName
             )
             Spacer(modifier = Modifier.width(6.dp))
         }

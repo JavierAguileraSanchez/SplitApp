@@ -22,6 +22,7 @@ fun UserAvatar(
     name: String,
     photoUrl: String? = null,
     size: Dp = 40.dp,
+    contentDescription: String? = null,
     modifier: Modifier = Modifier
 ) {
     val initial = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
@@ -29,7 +30,7 @@ fun UserAvatar(
     if (!photoUrl.isNullOrBlank()) {
         AsyncImage(
             model = photoUrl,
-            contentDescription = null,
+            contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .size(size)
