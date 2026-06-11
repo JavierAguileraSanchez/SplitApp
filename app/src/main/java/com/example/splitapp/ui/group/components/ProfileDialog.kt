@@ -1,5 +1,6 @@
 package com.example.splitapp.ui.group.components
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,6 +74,16 @@ fun ProfileDialog(
         ActivityResultContracts.TakePicture()
     ) { success -> if (success) pendingCameraUri?.let { onUploadPhoto(it) } }
 
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createTempImageUri(context)
+            pendingCameraUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
     LaunchedEffect(uploadPhotoState) {
         if (uploadPhotoState is UploadPhotoState.Success) onResetUploadPhoto()
     }
@@ -97,9 +108,17 @@ fun ProfileDialog(
                     TextButton(
                         onClick = {
                             showPhotoOptions = false
-                            val uri = createTempImageUri(context)
-                            pendingCameraUri = uri
-                            cameraLauncher.launch(uri)
+                            val permission = Manifest.permission.CAMERA
+                            val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                                context, permission
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            if (granted) {
+                                val uri = createTempImageUri(context)
+                                pendingCameraUri = uri
+                                cameraLauncher.launch(uri)
+                            } else {
+                                cameraPermissionLauncher.launch(permission)
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -236,6 +255,18 @@ fun ProfileDialog(
                         Text(stringResource(R.string.profile_load_error))
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                androidx.compose.material3.HorizontalDivider()
+                TextButton(
+                    onClick = onLogout,
+                    enabled = updateProfileState !is UpdateProfileState.Loading,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        stringResource(R.string.profile_logout),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         },
         confirmButton = {
@@ -247,15 +278,7 @@ fun ProfileDialog(
             }
         },
         dismissButton = {
-            Column {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.profile_close)) }
-                TextButton(
-                    onClick = onLogout,
-                    enabled = updateProfileState !is UpdateProfileState.Loading
-                ) {
-                    Text(stringResource(R.string.profile_logout))
-                }
-            }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.profile_close)) }
         }
     )
 }

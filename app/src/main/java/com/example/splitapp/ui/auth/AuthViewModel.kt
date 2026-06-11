@@ -1,6 +1,5 @@
 package com.example.splitapp.ui.auth
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.splitapp.data.model.User
@@ -44,15 +43,15 @@ class AuthViewModel(
         }
     }
 
-    fun register(nombre: String, email: String, password: String, photoUri: Uri? = null) {
+    fun register(nombre: String, email: String, password: String, photoBytes: ByteArray? = null) {
         viewModelScope.launch {
             _authState.value = AuthUiState.Loading
             try {
                 val result = registerUseCase(nombre, email, password)
                 result.onSuccess { user ->
-                    if (photoUri != null) {
+                    if (photoBytes != null) {
                         try {
-                            authRepository.uploadProfilePhoto(user.id, photoUri)
+                            authRepository.uploadProfilePhoto(user.id, photoBytes)
                                 .onSuccess { url -> authRepository.updateProfilePhoto(user.id, url) }
                         } catch (_: Exception) {
                             // La subida de foto no bloquea el registro

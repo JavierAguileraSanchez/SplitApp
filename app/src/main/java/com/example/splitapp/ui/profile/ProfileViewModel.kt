@@ -1,18 +1,21 @@
 package com.example.splitapp.ui.profile
 
+import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.splitapp.data.repository.AuthRepositoryImpl
 import com.example.splitapp.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ProfileViewModel(
+class ProfileViewModel(application: Application) : AndroidViewModel(application) {
+
     private val authRepository: AuthRepository = AuthRepositoryImpl()
-) : ViewModel() {
 
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Loading)
     val profileState: StateFlow<ProfileState> = _profileState
@@ -63,7 +66,13 @@ class ProfileViewModel(
         viewModelScope.launch {
             _uploadPhotoState.value = UploadPhotoState.Loading
             try {
-                authRepository.uploadProfilePhoto(uid, imageUri)
+                val bytes = withContext(Dispatchers.IO) {
+                    getApplication<Application>().contentResolver
+                        .openInputStream(imageUri)
+                        ?.use { it.readBytes() }
+                        ?: throw Exception("No se pudo leer la imagen seleccionada")
+                }
+                authRepository.uploadProfilePhoto(uid, bytes)
                     .onSuccess { photoUrl ->
                         authRepository.updateProfilePhoto(uid, photoUrl)
                             .onSuccess { _uploadPhotoState.value = UploadPhotoState.Success; loadUserProfile() }

@@ -1,6 +1,5 @@
 package com.example.splitapp.data.repository
 
-import android.net.Uri
 import com.example.splitapp.data.model.User
 import com.example.splitapp.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -85,13 +84,15 @@ class AuthRepositoryImpl : FirestoreRepository(), AuthRepository {
         }
     }
 
-    override suspend fun uploadProfilePhoto(uid: String, imageUri: Uri): Result<String> {
+    override suspend fun uploadProfilePhoto(uid: String, imageBytes: ByteArray): Result<String> {
         return try {
-            val storageRef = FirebaseStorage.getInstance().reference
-                .child("profile_photos/$uid.jpg")
-            storageRef.putFile(imageUri).await()
-            val downloadUrl = storageRef.downloadUrl.await().toString()
-            Result.success(downloadUrl)
+            withContext(Dispatchers.IO) {
+                val storageRef = FirebaseStorage.getInstance().reference
+                    .child("profile_photos/$uid.jpg")
+                storageRef.putBytes(imageBytes).await()
+                val downloadUrl = storageRef.downloadUrl.await().toString()
+                Result.success(downloadUrl)
+            }
         } catch (e: Exception) {
             Result.failure(Exception("Error al subir foto: ${e.message}"))
         }

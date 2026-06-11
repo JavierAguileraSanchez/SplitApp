@@ -1,5 +1,6 @@
 package com.example.splitapp.ui.auth
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,6 +74,16 @@ fun RegisterScreen(
         ActivityResultContracts.TakePicture()
     ) { success -> if (success) photoUri = pendingCameraUri }
 
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createTempImageUri(context)
+            pendingCameraUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
     LaunchedEffect(authState) {
         if (authState is AuthUiState.Success) {
             onNavigateToGroupList()
@@ -97,9 +108,17 @@ fun RegisterScreen(
                     TextButton(
                         onClick = {
                             showPhotoOptions = false
-                            val uri = createTempImageUri(context)
-                            pendingCameraUri = uri
-                            cameraLauncher.launch(uri)
+                            val permission = Manifest.permission.CAMERA
+                            val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                                context, permission
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            if (granted) {
+                                val uri = createTempImageUri(context)
+                                pendingCameraUri = uri
+                                cameraLauncher.launch(uri)
+                            } else {
+                                cameraPermissionLauncher.launch(permission)
+                            }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -224,7 +243,12 @@ fun RegisterScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Button(
-                        onClick = { authViewModel.register(nombre, email, password, photoUri) },
+                        onClick = {
+                            val bytes = photoUri?.let { uri ->
+                                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                            }
+                            authViewModel.register(nombre, email, password, bytes)
+                        },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(stringResource(R.string.retry))
@@ -237,7 +261,12 @@ fun RegisterScreen(
 
                 is AuthUiState.Idle -> {
                     Button(
-                        onClick = { authViewModel.register(nombre, email, password, photoUri) },
+                        onClick = {
+                            val bytes = photoUri?.let { uri ->
+                                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                            }
+                            authViewModel.register(nombre, email, password, bytes)
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = isEmailValid
                     ) {
